@@ -15,7 +15,7 @@ export default function UserProvider({ children }) {
 
 export async function GetUserToken(UserName, Password) {
   let token = ''
-  await fetch('http://www.homecproject.somee.com/api/Users/GetNewToken', {
+  await fetch('//www.homecproject.somee.com/api/Users/GetNewToken', {
     method: 'POST',
     body: JSON.stringify({
       username: UserName,
@@ -42,7 +42,7 @@ export async function GetUserToken(UserName, Password) {
 export async function GetUserInfo(token) {
   let userInfo = null
   await fetch(
-    `http://www.homecproject.somee.com/api/Users/GetUserloggedInfoByToken?token=${token}`,
+    `//www.homecproject.somee.com/api/Users/GetUserloggedInfoByToken?token=${token}`,
     {
       headers: {
         Authorization: 'Bearer ' + token,
