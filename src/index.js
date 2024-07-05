@@ -5,9 +5,12 @@ import 'core-js'
 
 import App from './App'
 import store from './store'
+import UserProvider from './Global/user'
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <App />
+    <UserProvider>
+      <App />
+    </UserProvider>
   </Provider>,
 )

@@ -1,20 +1,38 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
-import '../Global/user'
-
-function isValidUser() {
-  console.log(global.user.username)
-  const auth = sessionStorage.getItem('auth')
-  if (auth != 1) {
-    return false
-  }
-  return true
-}
+import { UserContext, GetUserInfo } from '../Global/user'
+import Cookies from 'js-cookie'
 
 const DefaultLayout = () => {
-  if (!isValidUser()) return <Navigate to="/" replace />
+  const userinfo = useContext(UserContext)
+  const [isValidUser, setValidUser] = useState(null)
+
+  useEffect(() => {
+    async function isValidUser() {
+      const token = Cookies.get('LOGIN_Info')
+
+      const UserdataInfo = await GetUserInfo(token)
+      if (UserdataInfo == null) {
+        setValidUser(false)
+        return false
+      }
+      console.log(UserdataInfo.userName)
+
+      userinfo.setUserInfo((prevUserInfo) => {
+        return { username: 'lol', UserID: '' }
+      })
+      console.log(userinfo)
+
+      console.log(userinfo.userInfo)
+      return true
+    }
+
+    isValidUser()
+  }, [])
+
+  if (isValidUser === false) return <Navigate to="/" replace />
 
   return (
     <div>

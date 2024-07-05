@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import {
@@ -18,21 +18,45 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import '../../../Global/user'
-
-function logined() {
-  global.user.username = document.getElementById('username').value
-  global.user.Password = document.getElementById('password').value
-  console.log(global.user.username)
-  console.log(global.user.Password)
-
-  window.location.hash = '/home'
-  sessionStorage.setItem('auth', 1)
-}
+import { UserContext, GetUserToken } from '../../../Global/user'
+import Cookies from 'js-cookie'
 
 function ClearLogined() {
-  sessionStorage.removeItem('auth')
+  // eslint-disable-next-line prettier/prettier
+  Cookies.remove('LOGIN_Info',{ path: '/' })
 }
 const Login = () => {
+  const userinfo = useContext(UserContext)
+
+  async function logined() {
+    await createCookie()
+
+    window.location.hash = '/home'
+  }
+
+  async function createCookie() {
+    let username = document.getElementById('username').value
+    let pwd = document.getElementById('password').value
+
+    let tokenKey = await GetUserToken(username, pwd)
+
+    if (tokenKey === '') {
+      ClearLogined()
+      return
+    }
+
+    Cookies.set('LOGIN_Info', tokenKey, {})
+
+    userinfo.setUserInfo((userInfo) => ({
+      ...userInfo,
+      username: username,
+    }))
+  }
+
+  useEffect(() => {
+    console.log(userinfo)
+  }, [])
+
   ClearLogined()
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
