@@ -9,7 +9,7 @@ class User {
 export const UserContext = createContext({})
 
 export default function UserProvider({ children }) {
-  const [userInfo, setUserInfo] = useState({})
+  const [userInfo, setUserInfo] = useState(new User())
   return <UserContext.Provider value={{ userInfo, setUserInfo }}>{children}</UserContext.Provider>
 }
 
@@ -41,15 +41,12 @@ export async function GetUserToken(UserName, Password) {
 
 export async function GetUserInfo(token) {
   let userInfo = null
-  await fetch(
-    `//www.homecproject.somee.com/api/Users/GetUserloggedInfoByToken?token=${token}`,
-    {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-type': 'application/json',
-      },
+  await fetch(`//www.homecproject.somee.com/api/Users/GetUserloggedInfoByToken?token=${token}`, {
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'Content-type': 'application/json',
     },
-  )
+  })
     .then((result) => {
       let Promiseresult = result.json()
       return Promiseresult
