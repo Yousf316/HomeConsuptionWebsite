@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { createContext, useEffect, useRef, useContext } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -27,13 +27,18 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import { colorthem } from '../Global/coloreThem'
 
 const AppHeader = () => {
+  const color = useContext(colorthem)
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  useEffect(() => {
+    color.setcolor(colorMode)
+  }, [colorMode])
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -54,7 +59,7 @@ const AppHeader = () => {
         <CHeaderNav className="d-none d-md-flex">
           <CNavItem>
             <CNavLink to="/home/dashboard" as={NavLink}>
-              Dashboard
+              لوحة التحكم
             </CNavLink>
           </CNavItem>
         </CHeaderNav>

@@ -53,7 +53,6 @@ export async function GetUserInfo(token) {
     })
     .then((UserInfoResult) => {
       userInfo = UserInfoResult
-      console.log(userInfo)
     })
     .catch((error) => console.error('Fetch error:', error))
 

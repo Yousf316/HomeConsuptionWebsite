@@ -37,7 +37,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'قائمة المشتريات',
-        to: '/base/breadcrumbs',
+        to: '/home/PurchsaseList',
       },
     ],
   },

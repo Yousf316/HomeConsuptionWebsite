@@ -18,7 +18,6 @@ const DefaultLayout = () => {
         setValidUser(false)
         return false
       }
-      console.log(UserdataInfo.userName)
 
       userinfo.setUserInfo((userInfo) => ({
         ...userInfo,
@@ -33,7 +32,6 @@ const DefaultLayout = () => {
   }, [])
 
   if (isValidUser === false) return <Navigate to="/" replace />
-
 
   return (
     <div>
