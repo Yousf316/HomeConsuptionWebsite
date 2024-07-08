@@ -26,15 +26,24 @@ function PurchaseList() {
         accessorKey: 'Purchase_Total',
         header: 'المجموع',
       },
+      
     ],
     [],
   )
   const [Rowitems, setRowitems] = useState([])
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    //pageSize: -1,
+     //customize the default page size
+  });
+  const [pagecount, setpagecount] = useState(-1)
 
   useEffect(() => {
+
     const token = Cookies.get('LOGIN_Info')
+
     async function fetchData() {
-      const dataTable = await GetPurchasesTable(token, '1')
+      const dataTable = await GetPurchasesTable(token,pagination.pageIndex+1 )
 
       const updatedRows = dataTable.map((element, key) => ({
         key: key,
@@ -44,16 +53,21 @@ function PurchaseList() {
         Purchase_Total: element.TotalAfterTax, // Use actual data if available
       }))
 
+      setpagecount( (prev) => prev =pagination.pageIndex+2)
       // Update state once with all changes
       setRowitems(updatedRows)
     }
     fetchData()
-  }, [])
+  }, [pagination.pageIndex])
   //return <CTable responsive="xl" hover columns={columns} items={Rowitems} />
+
   var element = document.querySelector('.MuiBox-root.css-exd1zr')
   element != null ? element.remove() : null
-  const color = useContext(colorthem)
 
+  var element2 = document.querySelector('#root > div > div.wrapper.d-flex.flex-column.min-vh-100 > div.body.flex-grow-1 > div > div > div.MuiTableContainer-root.css-nhjqqh-MuiTableContainer-root > table > thead > tr > th.MuiTableCell-root.MuiTableCell-head.MuiTableCell-alignLeft.MuiTableCell-sizeMedium.css-eb6d7g-MuiTableCell-root > div > div.Mui-TableHeadCell-Content-Labels.MuiBox-root.css-4ng264 > div')
+  element2 != null ? element2.remove() : null
+  const color = useContext(colorthem)
+ 
   const theme = useMemo(
     () =>
       createTheme({
@@ -65,6 +79,9 @@ function PurchaseList() {
     [color.color],
   )
 
+
+ 
+
   return (
     <ThemeProvider theme={theme}>
       <MaterialReactTable
@@ -72,14 +89,16 @@ function PurchaseList() {
         data={Rowitems}
         enableRowActions
         manualPagination={true}
-        rowCount={100}
+        pageCount={pagecount}
+        onPaginationChange ={ setPagination } //hoist pagination state to your state when it changes internally
+        state= { {pagination} }
         paginationDisplayMode={'pages'}
         renderRowActionMenuItems={({ row, table }) => [
           <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
             icon={<Edit />}
             key="edit"
             label="Edit"
-            onClick={() => console.info('Edit')}
+            onClick={() => console.info(row.original.id)}
             table={table}
           />,
           <MRT_ActionMenuItem
@@ -97,7 +116,7 @@ function PurchaseList() {
 
 export default PurchaseList
 
-async function GetPurchasesTable(token, PageNumber) {
+ export async function GetPurchasesTable(token, PageNumber) {
   let data = null
   await fetch(`//www.homecproject.somee.com/api/Purchase/GetPurchasesTable/${PageNumber}`, {
     headers: {
