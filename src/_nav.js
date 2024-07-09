@@ -32,7 +32,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'ادراج فاتورة مشتريات',
-        to: '/base/accordion',
+        to: '/home/Purchase/0',
       },
       {
         component: CNavItem,

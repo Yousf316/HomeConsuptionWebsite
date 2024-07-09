@@ -79,6 +79,11 @@ function PurchaseList() {
     [color.color],
   )
 
+// Correct: Uses a memoized function
+const handleClickEditePurchase = (id) => {
+  window.location.hash = `/home/Purchase/${id}`
+};
+// ...
 
  
 
@@ -98,14 +103,14 @@ function PurchaseList() {
             icon={<Edit />}
             key="edit"
             label="Edit"
-            onClick={() => console.info(row.original.id)}
+            onClick={() => handleClickEditePurchase(row.original.id)}
             table={table}
           />,
           <MRT_ActionMenuItem
             icon={<Delete />}
             key="delete"
             label="Delete"
-            onClick={() => console.info('Delete')}
+            onClick={() => handleClickEditePurchase(row.original.id)}
             table={table}
           />,
         ]}
