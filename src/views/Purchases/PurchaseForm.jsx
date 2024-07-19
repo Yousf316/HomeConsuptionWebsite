@@ -4,6 +4,8 @@ import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Cookies from 'js-cookie'
 import Styles from './PurchaseFormStyles.module.css'
+import { Box, Button } from '@mui/material'
+import { TaxPrecent } from '../../Global/Globla'
 
 function PurchaseForm() {
   function handleChangeSelect(e) {
@@ -12,7 +14,6 @@ function PurchaseForm() {
     console.log(document.getElementById('formSelectSores').value)
   }
 
-  const [Selectedtype, setSelectedtype] = useState(1)
   const [Stores, setStores] = useState([])
 
   useEffect(() => {
@@ -67,11 +68,13 @@ function PurchaseForm() {
 
 export function PurchaseFormTotal() {
   function handleDiscount(discountinfo) {
-    console.log(discountinfo.target.value)
     const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
     const TotalBeforeDiscount = document.getElementById('formInputTotal')
-    console.log(TotalafterDiscount.value)
-    TotalafterDiscount.value = TotalBeforeDiscount.value - discountinfo.target.value
+    const TotalAfterTax = document.getElementById('formInputTotalAfterTax')
+    const Tax = document.getElementById('formInputTax')
+    TotalafterDiscount.value = (TotalBeforeDiscount.value - discountinfo.target.value).toFixed(2)
+    TotalAfterTax.value = (TotalafterDiscount.value * TaxPrecent).toFixed(2)
+    Tax.value =  (TotalAfterTax.value - TotalafterDiscount.value).toFixed(2)
   }
   return (
     <Form className={Styles['Total-form-main']}>
@@ -110,6 +113,37 @@ export function PurchaseFormTotal() {
           <Form.Control type="number" readOnly={true} defaultValue={0.0} />
         </Col>
       </Form.Group>
+
+      <Form.Group as={Row} className={Styles['Total-form']} controlId="formInputTotalAfterTax">
+        <Form.Label column sm="1">
+          الصافي
+        </Form.Label>
+        <Col sm="5">
+          <Form.Control type="number" readOnly={true} defaultValue={0.0} />
+        </Col>
+      </Form.Group>
+    </Form>
+  )
+}
+
+export function PurchaseFormSave() {
+  function handleDiscount(discountinfo) {
+    console.log(discountinfo.target.value)
+    const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
+    const TotalBeforeDiscount = document.getElementById('formInputTotal')
+    console.log(TotalafterDiscount.value)
+    TotalafterDiscount.value = TotalBeforeDiscount.value - discountinfo.target.value
+  }
+  return (
+    <Form className={Styles['Save-form-main']}>
+      <div className={Styles['div-save-buttons']}>
+        <Button variant="outlined" style={{ minWidth: '150px', margin: '25px' }}>
+          الغاء
+        </Button>
+        <Button variant="contained" style={{ minWidth: '150px', margin: '25px' }}>
+          حفظ
+        </Button>
+      </div>
     </Form>
   )
 }

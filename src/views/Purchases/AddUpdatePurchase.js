@@ -1,149 +1,114 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { useEffect, useMemo, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import Cookies from 'js-cookie'
+import { AgGridReact } from 'ag-grid-react' // React Data Grid Component
+import 'ag-grid-community/styles/ag-grid.css' // Mandatory CSS required by the Data Grid
+import 'ag-grid-community/styles/ag-theme-quartz.min.css' // Optional Theme applied to the Data Grid
 
-import {
-  MRT_EditActionButtons,
-  MaterialReactTable,
-  // createRow,
-  useMaterialReactTable,
-} from 'material-react-table'
-import {
-  Box,
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Tooltip,
-} from '@mui/material'
+import { Button } from '@mui/material'
 
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
 import { colorthem } from '../../Global/coloreThem'
-import PurchaseForm, { PurchaseFormTotal } from './PurchaseForm'
+import PurchaseForm, { PurchaseFormTotal, PurchaseFormSave } from './PurchaseForm'
+import FormDialog from './Dialogs'
+import { GetPurchasesInfo, GetPurchaseSubInfo } from './PurchaseApi'
 
 const AddUpdatePurchase = () => {
-  const [validationErrors, setValidationErrors] = useState({})
-
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: 'Total',
-        header: 'المجموع',
-
-        enableEditing: false,
+  const columns = [
+    {
+      field: 'Edit',
+      headerName: 'تعديل',
+      cellRenderer: (RowInfo) => {
+        return (
+          <>
+            <Button
+              style={{ marginRight: '10px' }}
+              color="error"
+              variant="contained"
+              onClick={() => openDeleteConfirmModal(RowInfo.data.sort)}
+            >
+              حذف
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                console.log(RowInfo.data)
+                setUpdateItemRowInfo(RowInfo.data)
+                handleClickOpen(2)
+              }}
+            >
+              تعديل
+            </Button>
+          </>
+        )
       },
-      {
-        accessorKey: 'PricePerItem',
-        header: 'السعر',
-
-        required: true,
-      },
-      {
-        accessorKey: 'Quantity',
-        header: 'الكمية',
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.firstName,
-          helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              Quantity: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-      },
-      {
-        accessorKey: 'description',
-        header: 'الوصف',
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: 'itemName',
-        header: 'اسم المنتج',
-        muiEditTextFieldProps: {
-          //type: 'email',
-          required: true,
-          error: !!validationErrors?.itemName,
-          helperText: validationErrors?.itemName,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              itemName: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: 'id',
-        header: 'رقم المنتج',
-        // enableEditing: false,
-        //visibleInShowHideMenu :false,
-        //editVariant: 'select',
-        // editSelectOptions: null,
-        muiEditTextFieldProps: {
-          // select: true,
-          error: !!validationErrors?.id,
-          helperText: validationErrors?.id,
-        },
-      },
-      {
-        accessorKey: 'sort',
-        header: '#',
-        enableEditing: false,
-        //visibleInShowHideMenu :false,
-        //editVariant: 'select',
-        // editSelectOptions: null,
-        muiEditTextFieldProps: {
-          // select: true,
-          error: !!validationErrors?.sort,
-          helperText: validationErrors?.sort,
-        },
-      },
-    ],
-    [validationErrors],
-  )
+    },
+    {
+      field: 'Total',
+      headerName: 'المجموع',
+    },
+    {
+      field: 'PricePerItem',
+      headerName: 'السعر',
+    },
+    {
+      field: 'Quantity',
+      headerName: 'الكمية',
+    },
+    {
+      field: 'description',
+      headerName: 'الوصف',
+    },
+    {
+      field: 'itemName',
+      headerName: 'اسم المنتج',
+    },
+    {
+      field: 'id',
+      headerName: 'رقم المنتج',
+    },
+    {
+      field: 'sort',
+      headerName: '#',
+    },
+  ]
 
   const [Rowitems, setRowitems] = useState([])
+  const [isLoading, setisLoading] = useState(true)
   const { id } = useParams()
+  const [open, setOpen] = useState(false)
+  const [UpdateItemRownInfo, setUpdateItemRowInfo] = useState(null)
+  const [Typeitemsrow, setTypeitemsrow] = useState(1) // 1 create, 2 edite
+  const color = useContext(colorthem)
+  const baseBackgroundColor = color.color === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'
+  const handleClickOpen = (number) => {
+    setOpen(true)
+    setTypeitemsrow(number)
+  }
 
+  const handleClose = () => {
+    setOpen(false)
+  }
   useEffect(() => {
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
-        console.log(dataTable)
+
         document.getElementById('formPlaintextPurchaseID').value = dataTable.purchaseID
         document.getElementById('formSelectPurchaseType').value = dataTable.type
         document.getElementById('formInputTotalAfterDiscount').value = dataTable.totalBeforTax
+        document.getElementById('formInputTotalAfterTax').value = dataTable.totalAfterTax
 
         const SelectSores = document.getElementById('formSelectSores')
 
         SelectSores.value = dataTable.storeID
+
         document.getElementById('formInputTotal').value = dataTable.totalBeforTax
         const inputElement = document.getElementById('formInputTax')
-        inputElement.value = dataTable.taxAmount // Set the value programmatically
-        console.log(inputElement)
-        // Create a new input event (simulating user input)
+        inputElement.value = dataTable.taxAmount
         const inputEvent = new InputEvent('input', {
           bubbles: true, // Allow event to bubble up the DOM
           cancelable: true, // Allow event to be canceled
         })
-
-        console.log(inputEvent)
 
         // Dispatch the input event
         inputElement.dispatchEvent(inputEvent)
@@ -152,7 +117,6 @@ const AddUpdatePurchase = () => {
 
         if (dataTable.type == 2) {
           const PurchaseSub = await GetPurchaseSubInfo(id)
-          console.log(PurchaseSub)
 
           const updatedRows = PurchaseSub.map((element, key) => ({
             key: key,
@@ -168,35 +132,17 @@ const AddUpdatePurchase = () => {
           setRowitems(updatedRows)
         }
       }
-      GetPurchaseInfo()
+      const SelectSores = document.getElementById('formSelectSores')
+      if (SelectSores.length != 0) {
+        GetPurchaseInfo()
+      } else {
+        setisLoading((preLoading) => !preLoading)
+      }
     }
-  }, [id])
-  const handleCreateUser = async ({ values, table }) => {
-    const newValidationErrors = validateUser(values)
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors)
-      return
-    }
-    setValidationErrors({})
-    await Createitem(values)
-    table.setCreatingRow(null) //exit creating mode
-  }
-
-  const handleSaveUser = async ({ values, table }) => {
-    const newValidationErrors = validateUser(values)
-
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors)
-      return
-    }
-    setValidationErrors({})
-    await Updateitem(values)
-    table.setEditingRow(null) //exit editing mode
-  }
-
-  const openDeleteConfirmModal = (row) => {
+  }, [id, isLoading])
+  function openDeleteConfirmModal(rownumber) {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setRowitems((prevUsers) => prevUsers.filter((p) => p.sort != row.original.sort))
+      setRowitems((prevUsers) => prevUsers.filter((p) => p.sort != rownumber))
 
       setRowitems((prevUsers) => {
         let idnumber = 1 // Initialize the ID counter
@@ -208,22 +154,23 @@ const AddUpdatePurchase = () => {
       })
     }
   }
-  function Createitem(newUserInfo) {
-    newUserInfo.sort = Rowitems.length + 1
-    newUserInfo.Total = Number(newUserInfo.PricePerItem) * Number(newUserInfo.Quantity)
+  function HandleCreateitem(newItemInfo) {
+    const sort = Rowitems.length + 1
+    newItemInfo.Total = Number(newItemInfo.PricePerItem) * Number(newItemInfo.Quantity)
     //newUserInfo.Total =15
-    setRowitems((prevUsers) => [
-      ...prevUsers,
+    setRowitems((previtems) => [
+      ...previtems,
       {
-        ...newUserInfo,
+        ...newItemInfo,
+        sort: sort,
       },
     ])
   }
 
-  function Updateitem(UpdateUserInfo) {
+  function handleUpdateitem(UpdateUserInfo, sort) {
     setRowitems((prevUsers) => {
       return prevUsers.map((user) => {
-        if (user.sort === UpdateUserInfo.sort) {
+        if (user.sort === sort) {
           // Update the specific user info here
           return { ...user, ...UpdateUserInfo }
         }
@@ -232,82 +179,35 @@ const AddUpdatePurchase = () => {
     })
   }
 
-  const color = useContext(colorthem)
-  const baseBackgroundColor = color.color === 'dark' ? 'rgb(13, 0, 0)' : 'rgb(255, 255, 255)'
-
-  const table = useMaterialReactTable({
-    columns,
-    data: Rowitems,
-    createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
-    editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
-
-    onCreatingRowSave: handleCreateUser,
-    onEditingRowSave: handleSaveUser,
-
-    onCreatingRowCancel: () => setValidationErrors({}),
-    onEditingRowCancel: () => setValidationErrors({}),
-    //optionally customize modal content
-    renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
-        <DialogTitle variant="h3">أدراج بند</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
-        </DialogContent>
-        <DialogActions>
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </DialogActions>
-      </>
-    ),
-    //optionally customize modal content
-    renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <>
-        <DialogTitle variant="h3">Edit User</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
-        </DialogContent>
-        <DialogActions>
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </DialogActions>
-      </>
-    ),
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="تعديل">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="حذف">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      <Button
-        variant="contained"
-        onClick={() => {
-          table.setCreatingRow(true)
-        }}
-      >
-        أدراج بند
-      </Button>
-    ),
-    muiTableHeadCellProps: {
-      //no useTheme hook needed, just use the `sx` prop with the theme callback
-      sx: (theme) => ({
-        color: theme.palette.text.secondary,
-      }),
-    },
-  })
-
   return (
     <>
       <PurchaseForm />
-      <MaterialReactTable table={table} />
+      <div>
+        <Button
+          variant="contained"
+          onClick={() => handleClickOpen(1)}
+          style={{ minWidth: '150px', margin: '10px 0' }}
+        >
+          ادرج بند
+        </Button>
+      </div>
+      <div
+        className={baseBackgroundColor} // applying the Data Grid theme
+        style={{ height: 500 }} // the Data Grid will fill the size of the parent container
+      >
+        <AgGridReact rowData={Rowitems} columnDefs={columns} />
+      </div>
       <PurchaseFormTotal />
+      <PurchaseFormSave />
+
+      {open && <FormDialog
+        open={open}
+        handleClose={handleClose}
+        HandleCreateitem={HandleCreateitem}
+        type={Typeitemsrow}
+        handleUpdateitem={handleUpdateitem}
+        UpdateItemRownInfo={UpdateItemRownInfo}
+      />}
     </>
   )
 }
@@ -320,50 +220,6 @@ function validateUser(user) {
   return {
     Quantity: !validateRequired(user.Quantity) ? 'Quantity is Required' : '',
     //id: !validateRequired(user.id) ? 'Last Name is Required' : '',
-    itemName: !validateRequired(user.Quantity) ? 'itemName is Required' : '',
+    itemName: !validateRequired(user.itemName) ? 'itemName is Required' : '',
   }
-}
-
-export async function GetPurchasesInfo(PurchaseID) {
-  const token = Cookies.get('LOGIN_Info')
-
-  let data = null
-  await fetch(`//www.homecproject.somee.com/api/Purchase/${PurchaseID}`, {
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Content-type': 'application/json',
-    },
-  })
-    .then((result) => {
-      let Promiseresult = result.json()
-      return Promiseresult
-    })
-    .then((finalResult) => {
-      data = finalResult
-    })
-    .catch((error) => console.error('Fetch error:', error))
-
-  return data
-}
-
-export async function GetPurchaseSubInfo(PurchaseID) {
-  const token = Cookies.get('LOGIN_Info')
-
-  let data = null
-  await fetch(`//www.homecproject.somee.com/api/PurchaseSub/${PurchaseID}`, {
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Content-type': 'application/json',
-    },
-  })
-    .then((result) => {
-      let Promiseresult = result.json()
-      return Promiseresult
-    })
-    .then((finalResult) => {
-      data = finalResult
-    })
-    .catch((error) => console.error('Fetch error:', error))
-
-  return data
 }

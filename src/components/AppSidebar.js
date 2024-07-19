@@ -31,9 +31,9 @@ const AppSidebar = () => {
       position="fixed"
       unfoldable={unfoldable}
       visible={sidebarShow}
-      onVisibleChange={(visible) => {
-        dispatch({ type: 'set', sidebarShow: visible })
-      }}
+      // onVisibleChange={(visible) => {
+      //   dispatch({ type: 'set', sidebarShow: visible })
+      // }}
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">

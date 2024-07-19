@@ -5,3 +5,13 @@
 .Total-form-main {
   margin-bottom: 15px;
 }
+.Save-form-main{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+
+.div-save-buttons {
+  display: ruby;
+}

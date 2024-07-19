@@ -32,7 +32,6 @@ const DefaultLayout = () => {
   }, [])
 
   if (isValidUser === false) return <Navigate to="/" replace />
-
   return (
     <div>
       <AppSidebar />

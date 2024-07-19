@@ -1,11 +1,9 @@
-import { CTable, CButton, useColorModes } from '@coreui/react'
 import React, { useEffect, useState, useMemo, useContext } from 'react'
-import Cookies from 'js-cookie'
 import { MaterialReactTable, MRT_ActionMenuItem, useMaterialReactTable } from 'material-react-table'
 import { Edit, Delete } from '@mui/icons-material'
 import { createTheme, ThemeProvider } from '@mui/material'
-import { useSelector } from 'react-redux'
 import { colorthem } from '../../Global/coloreThem'
+import { GetPurchasesTable } from './PurchaseApi'
 
 function PurchaseList() {
   const columns = useMemo(
@@ -38,12 +36,11 @@ function PurchaseList() {
   const [pagecount, setpagecount] = useState(-1)
 
   useEffect(() => {
-    const token = Cookies.get('LOGIN_Info')
-
     async function fetchData() {
-      const dataTable = await GetPurchasesTable(token, pagination.pageIndex + 1)
+      const dataTable = await GetPurchasesTable(pagination.pageIndex + 1)
+      const dtPurchase = JSON.parse(dataTable.purchasejson)
 
-      const updatedRows = dataTable.map((element, key) => ({
+      const updatedRows = dtPurchase.map((element, key) => ({
         key: key,
         id: String(element.PurchaseID),
         Purchase_Date: new Date(element.IssueDate).toLocaleDateString(), // Use actual data if available
@@ -118,23 +115,3 @@ function PurchaseList() {
 }
 
 export default PurchaseList
-
-export async function GetPurchasesTable(token, PageNumber) {
-  let data = null
-  await fetch(`//www.homecproject.somee.com/api/Purchase/GetPurchasesTable/${PageNumber}`, {
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Content-type': 'application/json',
-    },
-  })
-    .then((result) => {
-      let Promiseresult = result.json()
-      return Promiseresult
-    })
-    .then((finalResult) => {
-      data = finalResult
-    })
-    .catch((error) => console.error('Fetch error:', error))
-
-  return data
-}
