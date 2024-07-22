@@ -67,8 +67,8 @@ const Login = () => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm action="#/home" method="GET">
-                    <h1>Login</h1>
-                    <p className="text-body-secondary">Sign In to your account</p>
+                    <h1>تسجيل الدخول</h1>
+                    <p className="text-body-secondary">سجل دخولك باستخدام حسابك</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
@@ -94,24 +94,23 @@ const Login = () => {
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
-                          Forgot password?
+                          نسيت كلمة المرور
                         </CButton>
                       </CCol>
                     </CRow>
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
+              <CCard className="text-white bg-primary py-5" >
                 <CCardBody className="text-center">
                   <div>
-                    <h2>Sign up</h2>
+                    <h2>حساب جديد؟</h2>
                     <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
+                       موقع المحاسب المنزلي ,  لحساب الفوانير المنزلية. سجل وقم بتجربة حساب فواتيرك
                     </p>
-                    <Link to="/home">
+                    <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Register Now!
+                        سجل الان
                       </CButton>
                     </Link>
                   </div>

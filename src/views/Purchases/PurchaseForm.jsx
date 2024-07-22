@@ -9,9 +9,8 @@ import { TaxPrecent } from '../../Global/Globla'
 
 function PurchaseForm() {
   function handleChangeSelect(e) {
-    console.log(e.target.value)
+    // console.log(e.target.value)
     //document.getElementById("formPlaintextPurchaseID").value =1
-    console.log(document.getElementById('formSelectSores').value)
   }
 
   const [Stores, setStores] = useState([])
@@ -19,7 +18,6 @@ function PurchaseForm() {
   useEffect(() => {
     async function fetchData() {
       const dataTable = await GetٍStores()
-      //console.log(dataTable)
       setStores(dataTable)
     }
     fetchData()
@@ -67,14 +65,16 @@ function PurchaseForm() {
 }
 
 export function PurchaseFormTotal() {
-  function handleDiscount(discountinfo) {
+  function handleCalculateResult() {
     const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
     const TotalBeforeDiscount = document.getElementById('formInputTotal')
     const TotalAfterTax = document.getElementById('formInputTotalAfterTax')
     const Tax = document.getElementById('formInputTax')
-    TotalafterDiscount.value = (TotalBeforeDiscount.value - discountinfo.target.value).toFixed(2)
+    const discount = document.getElementById('formInputDiscount')
+    TotalafterDiscount.value = (TotalBeforeDiscount.value - discount.value).toFixed(2)
     TotalAfterTax.value = (TotalafterDiscount.value * TaxPrecent).toFixed(2)
-    Tax.value =  (TotalAfterTax.value - TotalafterDiscount.value).toFixed(2)
+    Tax.value = (TotalAfterTax.value - TotalafterDiscount.value).toFixed(2)
+    console.log('fired')
   }
   return (
     <Form className={Styles['Total-form-main']}>
@@ -83,7 +83,12 @@ export function PurchaseFormTotal() {
           المجموع
         </Form.Label>
         <Col sm="5">
-          <Form.Control type="number" readOnly={true} defaultValue={0.0} />
+          <Form.Control
+            type="number"
+            readOnly={true}
+            defaultValue={0.0}
+            onChange={handleCalculateResult}
+          />
         </Col>
       </Form.Group>
 
@@ -92,7 +97,11 @@ export function PurchaseFormTotal() {
           الخصم
         </Form.Label>
         <Col sm="5">
-          <Form.Control type="number" defaultValue={0.0} onChange={(e) => handleDiscount(e)} />
+          <Form.Control
+            type="number"
+            defaultValue={0.0}
+            onChange={() => handleCalculateResult.bind()}
+          />
         </Col>
       </Form.Group>
 
@@ -127,13 +136,6 @@ export function PurchaseFormTotal() {
 }
 
 export function PurchaseFormSave() {
-  function handleDiscount(discountinfo) {
-    console.log(discountinfo.target.value)
-    const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
-    const TotalBeforeDiscount = document.getElementById('formInputTotal')
-    console.log(TotalafterDiscount.value)
-    TotalafterDiscount.value = TotalBeforeDiscount.value - discountinfo.target.value
-  }
   return (
     <Form className={Styles['Save-form-main']}>
       <div className={Styles['div-save-buttons']}>

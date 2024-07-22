@@ -16,6 +16,7 @@ import { colorthem } from '../../Global/coloreThem'
 import { GetItemsTable } from '../Items/ItemsApi'
 import NativeSelect from '@mui/material/NativeSelect'
 import { useEffect } from 'react'
+import { object } from 'prop-types'
 
 export default function FormDialog({
   open,
@@ -28,13 +29,13 @@ export default function FormDialog({
   const [openStores, setopenStores] = React.useState(false)
   const [ItemInfo, seItemInfo] = React.useState(null)
   const [isLoading, setisLoading] = React.useState(false)
+  const [errors, setErrors] = React.useState({})
 
   React.useEffect(() => {
     if (ItemInfo != null) {
       document.getElementById('PricePerItem').value = ItemInfo.Price
       document.getElementById('ItemsID').value = ItemInfo.ItemID
       document.getElementById('ItemName').value = ItemInfo.itemName
-      console.log(type)
     }
   }, [ItemInfo])
 
@@ -44,14 +45,13 @@ export default function FormDialog({
         document.getElementById('PricePerItem').value = UpdateItemRownInfo.PricePerItem
         document.getElementById('ItemsID').value = UpdateItemRownInfo.id
         document.getElementById('ItemName').value = UpdateItemRownInfo.itemName
+        document.getElementById('Description').value = UpdateItemRownInfo.description
       }
     }
-    console.log('hi')
-    if (document.getElementById('PricePerItem') != null  ) {
+    if (document.getElementById('PricePerItem') != null) {
       GetItemInfo()
     } else {
-      if (type === 2)
-      setisLoading((preLoading) => !preLoading)
+      if (type === 2) setisLoading((preLoading) => !preLoading)
     }
   }, [isLoading])
 
@@ -66,20 +66,26 @@ export default function FormDialog({
 
   const handleCreateItem = () => {
     const newItem = {
-      PricePerItem: document.getElementById('PricePerItem').value,
+      PricePerItem: parseFloat(
+        parseFloat(document.getElementById('PricePerItem').value).toFixed(2),
+      ),
       id: document.getElementById('ItemsID').value,
       itemName: document.getElementById('ItemName').value,
-      Quantity: document.getElementById('Quantity').value,
+      Quantity: parseFloat(parseFloat(document.getElementById('Quantity').value).toFixed(2)),
+      description: document.getElementById('Description').value,
     }
     HandleCreateitem(newItem)
   }
 
   const handleUpdateItem = () => {
     const UpdateItem = {
-      PricePerItem: document.getElementById('PricePerItem').value,
+      PricePerItem: parseFloat(
+        parseFloat(document.getElementById('PricePerItem').value).toFixed(2),
+      ),
       id: document.getElementById('ItemsID').value,
       itemName: document.getElementById('ItemName').value,
-      Quantity: document.getElementById('Quantity').value,
+      Quantity: parseFloat(parseFloat(document.getElementById('Quantity').value).toFixed(2)),
+      description: document.getElementById('Description').value,
     }
     handleUpdateitem(UpdateItem, UpdateItemRownInfo.sort)
   }
@@ -91,6 +97,35 @@ export default function FormDialog({
   const handleCloseStores = () => {
     setopenStores(false)
   }
+
+  function IsValid() {
+    const ValidationErrors = {}
+    const PricePerItem = document.getElementById('PricePerItem').value
+    const ItemsID = document.getElementById('ItemsID').value
+    //const ItemName = document.getElementById('ItemName').value
+    const Quantity = document.getElementById('Quantity').value
+
+    if (parseFloat(PricePerItem) <= 0) {
+      ValidationErrors.PricePerItem = 'السعر يجب ان يكون رقم صحيح'
+    }
+
+    if (parseFloat(Quantity) <= 0) {
+      ValidationErrors.Quantity = 'الكمية يجب ان تكون رقم صحيح'
+    }
+
+    if (ItemsID === '0') {
+      ValidationErrors.ItemsID = 'الرجاء اختيار منتج'
+    }
+
+    setErrors(ValidationErrors)
+
+    if (Object.keys(ValidationErrors).length === 0) {
+      return true
+    } else {
+      false
+    }
+  }
+
   return (
     <React.Fragment>
       <FormDialogStores
@@ -103,6 +138,10 @@ export default function FormDialog({
         onClose={handleClose}
         PaperProps={{
           component: 'form',
+          onSubmit: (event) => {
+            event.preventDefault()
+            if (IsValid()) handleAcceptButton()
+          },
         }}
       >
         <DialogTitle>أدراج بند</DialogTitle>
@@ -113,11 +152,13 @@ export default function FormDialog({
             id="PricePerItem"
             name="PricePerItem"
             label="السعر"
-            type="number"
+            type="text"
             fullWidth
             variant="standard"
             spellCheck
             defaultValue={0}
+            error={errors.PricePerItem ? true : false}
+            helperText={errors.PricePerItem}
           />
           <FormControlLabel control={<Checkbox defaultChecked />} label="شامل الضريبة" />
           <TextField
@@ -126,11 +167,13 @@ export default function FormDialog({
             id="Quantity"
             name="Quantity"
             label="الكمية"
-            type="number"
+            type="text"
             fullWidth
             variant="standard"
             spellCheck
             defaultValue={1}
+            error={errors.Quantity ? true : false}
+            helperText={errors.Quantity}
           />
           <TextField
             margin="dense"
@@ -172,13 +215,13 @@ export default function FormDialog({
             variant="standard"
             spellCheck
             defaultValue={0}
+            error={errors.ItemsID ? true : false}
+            helperText={errors.ItemsID}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>الغاء</Button>
-          <Button type="button" onClick={() => handleAcceptButton()}>
-            موافق
-          </Button>
+          <Button type="submit">موافق</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

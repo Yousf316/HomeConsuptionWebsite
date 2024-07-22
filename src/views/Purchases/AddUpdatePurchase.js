@@ -31,7 +31,6 @@ const AddUpdatePurchase = () => {
             <Button
               variant="contained"
               onClick={() => {
-                console.log(RowInfo.data)
                 setUpdateItemRowInfo(RowInfo.data)
                 handleClickOpen(2)
               }}
@@ -92,28 +91,28 @@ const AddUpdatePurchase = () => {
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
-
         document.getElementById('formPlaintextPurchaseID').value = dataTable.purchaseID
         document.getElementById('formSelectPurchaseType').value = dataTable.type
         document.getElementById('formInputTotalAfterDiscount').value = dataTable.totalBeforTax
         document.getElementById('formInputTotalAfterTax').value = dataTable.totalAfterTax
+        document.getElementById('formInputDiscount').value = dataTable.totalAfterTax
+          ? dataTable.totalAfterTax
+          : 0
 
         const SelectSores = document.getElementById('formSelectSores')
 
         SelectSores.value = dataTable.storeID
 
-        document.getElementById('formInputTotal').value = dataTable.totalBeforTax
-        const inputElement = document.getElementById('formInputTax')
-        inputElement.value = dataTable.taxAmount
-        const inputEvent = new InputEvent('input', {
-          bubbles: true, // Allow event to bubble up the DOM
-          cancelable: true, // Allow event to be canceled
-        })
+        const inputElement = document.getElementById('formInputTotal')
 
-        // Dispatch the input event
-        inputElement.dispatchEvent(inputEvent)
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          'value',
+        ).set
+        nativeInputValueSetter.call(inputElement, dataTable.totalBeforTax)
 
-        // Now the onchange event should fire
+        const event = new Event('input', { bubbles: true })
+        inputElement.dispatchEvent(event)
 
         if (dataTable.type == 2) {
           const PurchaseSub = await GetPurchaseSubInfo(id)
@@ -140,6 +139,16 @@ const AddUpdatePurchase = () => {
       }
     }
   }, [id, isLoading])
+
+  useEffect(() => {
+    let TotalAmount = 0
+    Rowitems.forEach((Row) => {
+      TotalAmount += Row.Total
+    })
+    if (TotalAmount != 0) {
+    }
+  }, [Rowitems])
+
   function openDeleteConfirmModal(rownumber) {
     if (window.confirm('Are you sure you want to delete this user?')) {
       setRowitems((prevUsers) => prevUsers.filter((p) => p.sort != rownumber))
@@ -156,8 +165,7 @@ const AddUpdatePurchase = () => {
   }
   function HandleCreateitem(newItemInfo) {
     const sort = Rowitems.length + 1
-    newItemInfo.Total = Number(newItemInfo.PricePerItem) * Number(newItemInfo.Quantity)
-    //newUserInfo.Total =15
+    newItemInfo.Total = parseFloat((newItemInfo.PricePerItem * newItemInfo.Quantity).toFixed(2))
     setRowitems((previtems) => [
       ...previtems,
       {
@@ -168,6 +176,10 @@ const AddUpdatePurchase = () => {
   }
 
   function handleUpdateitem(UpdateUserInfo, sort) {
+    UpdateUserInfo.Total = parseFloat(
+      (UpdateUserInfo.PricePerItem * UpdateUserInfo.Quantity).toFixed(2),
+    )
+
     setRowitems((prevUsers) => {
       return prevUsers.map((user) => {
         if (user.sort === sort) {
@@ -200,26 +212,18 @@ const AddUpdatePurchase = () => {
       <PurchaseFormTotal />
       <PurchaseFormSave />
 
-      {open && <FormDialog
-        open={open}
-        handleClose={handleClose}
-        HandleCreateitem={HandleCreateitem}
-        type={Typeitemsrow}
-        handleUpdateitem={handleUpdateitem}
-        UpdateItemRownInfo={UpdateItemRownInfo}
-      />}
+      {open && (
+        <FormDialog
+          open={open}
+          handleClose={handleClose}
+          HandleCreateitem={HandleCreateitem}
+          type={Typeitemsrow}
+          handleUpdateitem={handleUpdateitem}
+          UpdateItemRownInfo={UpdateItemRownInfo}
+        />
+      )}
     </>
   )
 }
 
 export default AddUpdatePurchase
-
-const validateRequired = (value) => !!value.length
-
-function validateUser(user) {
-  return {
-    Quantity: !validateRequired(user.Quantity) ? 'Quantity is Required' : '',
-    //id: !validateRequired(user.id) ? 'Last Name is Required' : '',
-    itemName: !validateRequired(user.itemName) ? 'itemName is Required' : '',
-  }
-}
