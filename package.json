@@ -30,6 +30,8 @@
     "chart.js": "^4.4.3",
     "classnames": "^2.5.1",
     "core-js": "^3.37.1",
+    "date-fns": "^3.6.0",
+    "dayjs": "^1.11.12",
     "js-cookie": "^3.0.5",
     "material-react-table": "^2.13.0",
     "prop-types": "^15.8.1",

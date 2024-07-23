@@ -31,6 +31,16 @@ export default function FormDialog({
   const [isLoading, setisLoading] = React.useState(false)
   const [errors, setErrors] = React.useState({})
 
+  function GetItemInfo() {
+    if (type === 2) {
+      document.getElementById('PricePerItem').value = UpdateItemRownInfo.PricePerItem
+      document.getElementById('ItemsID').value = UpdateItemRownInfo.id
+      document.getElementById('ItemName').value = UpdateItemRownInfo.itemName
+      document.getElementById('Description').value = UpdateItemRownInfo.description
+      document.getElementById('Quantity').value = UpdateItemRownInfo.Quantity
+    }
+  }
+
   React.useEffect(() => {
     if (ItemInfo != null) {
       document.getElementById('PricePerItem').value = ItemInfo.Price
@@ -40,14 +50,7 @@ export default function FormDialog({
   }, [ItemInfo])
 
   useEffect(() => {
-    function GetItemInfo() {
-      if (type === 2) {
-        document.getElementById('PricePerItem').value = UpdateItemRownInfo.PricePerItem
-        document.getElementById('ItemsID').value = UpdateItemRownInfo.id
-        document.getElementById('ItemName').value = UpdateItemRownInfo.itemName
-        document.getElementById('Description').value = UpdateItemRownInfo.description
-      }
-    }
+
     if (document.getElementById('PricePerItem') != null) {
       GetItemInfo()
     } else {

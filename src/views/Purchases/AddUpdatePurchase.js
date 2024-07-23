@@ -11,6 +11,9 @@ import { colorthem } from '../../Global/coloreThem'
 import PurchaseForm, { PurchaseFormTotal, PurchaseFormSave } from './PurchaseForm'
 import FormDialog from './Dialogs'
 import { GetPurchasesInfo, GetPurchaseSubInfo } from './PurchaseApi'
+import { TaxPrecent } from '../../Global/Globla'
+import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 const AddUpdatePurchase = () => {
   const columns = [
@@ -43,7 +46,7 @@ const AddUpdatePurchase = () => {
     },
     {
       field: 'Total',
-      headerName: 'المجموع',
+      headerName: 'المجموع شامل الضريبة',
     },
     {
       field: 'PricePerItem',
@@ -75,10 +78,13 @@ const AddUpdatePurchase = () => {
   const [isLoading, setisLoading] = useState(true)
   const { id } = useParams()
   const [open, setOpen] = useState(false)
+  const [purchasetype, setpurchasetype] = useState(1)
   const [UpdateItemRownInfo, setUpdateItemRowInfo] = useState(null)
   const [Typeitemsrow, setTypeitemsrow] = useState(1) // 1 create, 2 edite
   const color = useContext(colorthem)
   const baseBackgroundColor = color.color === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'
+  const [valueDate, setvalueDate] = useState(dayjs(Date()))
+
   const handleClickOpen = (number) => {
     setOpen(true)
     setTypeitemsrow(number)
@@ -87,66 +93,102 @@ const AddUpdatePurchase = () => {
   const handleClose = () => {
     setOpen(false)
   }
+
+  async function SetPurchaseInfo(dataTable) {
+    document.getElementById('formPlaintextPurchaseID').value = dataTable.purchaseID
+    document.getElementById('formSelectPurchaseType').value = dataTable.type
+    document.getElementById('formInputTotalAfterDiscount').value = dataTable.totalBeforTax
+    document.getElementById('formInputTotalAfterTax').value = dataTable.totalAfterTax
+    document.getElementById('formInputDiscount').value = dataTable.discount ? dataTable.discount : 0
+
+    const SelectSores = document.getElementById('formSelectSores')
+
+    SelectSores.value = dataTable.storeID
+    //
+
+    const formattedDate = format(dataTable.issueDate, 'yyyy-MM-dd')
+    setvalueDate(dayjs(formattedDate))
+
+    //
+    const inputElement = document.getElementById('formInputTotal')
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value',
+    ).set
+    nativeInputValueSetter.call(inputElement, dataTable.totalBeforTax)
+
+    const event = new Event('input', { bubbles: true })
+    inputElement.dispatchEvent(event)
+    //
+    if (dataTable.type == 2) {
+      const PurchaseSub = await GetPurchaseSubInfo(id)
+
+      const updatedRows = PurchaseSub.map((element, key) => ({
+        key: key,
+        id: String(element.itemID),
+        itemName: element.itemName, // Use actual data if available
+        description: element.description, // Use actual data if available
+        Quantity: element.quantity, // Use actual data if available
+        PricePerItem: element.itemPrice,
+        sort: element.p_subID,
+        Total: element.totalAmount, // Use actual data if available
+      }))
+
+      setRowitems(updatedRows)
+      setpurchasetype(dataTable.type)
+    }
+  }
+  function ResetPageValues() {
+    document.getElementById('formPlaintextPurchaseID').value = 'لا يوجد'
+    document.getElementById('formSelectPurchaseType').value = 1
+    document.getElementById('formInputTotalAfterDiscount').value = 0
+    document.getElementById('formInputTotalAfterTax').value = 0
+    document.getElementById('formInputDiscount').value = 0
+    document.getElementById('formInputTotal').value = 0
+    document.getElementById('formInputTax').value = 0
+    setvalueDate(dayjs(Date()))
+    setRowitems([])
+  }
+
+  function CalculateItemsTotal() {
+    let TotalAmount = 0
+    Rowitems.forEach((Row) => {
+      TotalAmount += Row.Total
+    })
+
+    const inputElement = document.getElementById('formInputTotal')
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value',
+    ).set
+    nativeInputValueSetter.call(inputElement, (TotalAmount / TaxPrecent).toFixed(2))
+
+    const event = new Event('input', { bubbles: true })
+    inputElement.dispatchEvent(event)
+  }
+
   useEffect(() => {
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
-        document.getElementById('formPlaintextPurchaseID').value = dataTable.purchaseID
-        document.getElementById('formSelectPurchaseType').value = dataTable.type
-        document.getElementById('formInputTotalAfterDiscount').value = dataTable.totalBeforTax
-        document.getElementById('formInputTotalAfterTax').value = dataTable.totalAfterTax
-        document.getElementById('formInputDiscount').value = dataTable.totalAfterTax
-          ? dataTable.totalAfterTax
-          : 0
-
-        const SelectSores = document.getElementById('formSelectSores')
-
-        SelectSores.value = dataTable.storeID
-
-        const inputElement = document.getElementById('formInputTotal')
-
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-          window.HTMLInputElement.prototype,
-          'value',
-        ).set
-        nativeInputValueSetter.call(inputElement, dataTable.totalBeforTax)
-
-        const event = new Event('input', { bubbles: true })
-        inputElement.dispatchEvent(event)
-
-        if (dataTable.type == 2) {
-          const PurchaseSub = await GetPurchaseSubInfo(id)
-
-          const updatedRows = PurchaseSub.map((element, key) => ({
-            key: key,
-            id: String(element.itemID),
-            itemName: element.itemName, // Use actual data if available
-            description: element.description, // Use actual data if available
-            Quantity: element.quantity, // Use actual data if available
-            PricePerItem: element.itemPrice,
-            sort: element.p_subID,
-            Total: element.totalAmount, // Use actual data if available
-          }))
-
-          setRowitems(updatedRows)
-        }
+        SetPurchaseInfo(dataTable)
       }
       const SelectSores = document.getElementById('formSelectSores')
+
       if (SelectSores.length != 0) {
         GetPurchaseInfo()
       } else {
         setisLoading((preLoading) => !preLoading)
       }
+    } else {
+      ResetPageValues()
     }
   }, [id, isLoading])
 
   useEffect(() => {
-    let TotalAmount = 0
-    Rowitems.forEach((Row) => {
-      TotalAmount += Row.Total
-    })
-    if (TotalAmount != 0) {
-    }
+    CalculateItemsTotal()
   }, [Rowitems])
 
   function openDeleteConfirmModal(rownumber) {
@@ -191,14 +233,28 @@ const AddUpdatePurchase = () => {
     })
   }
 
+  function handlePurchaseType(typeid) {
+    setpurchasetype(typeid)
+
+    if (typeid == 2) {
+      CalculateItemsTotal()
+    }
+  }
+
   return (
     <>
-      <PurchaseForm />
+      <PurchaseForm
+        handlePurchaseType={handlePurchaseType}
+        themeColore={color.color}
+        valueDate={valueDate}
+        setvalueDate={setvalueDate}
+      />
       <div>
         <Button
           variant="contained"
           onClick={() => handleClickOpen(1)}
           style={{ minWidth: '150px', margin: '10px 0' }}
+          disabled={purchasetype == 1 ? true : false}
         >
           ادرج بند
         </Button>
@@ -209,7 +265,7 @@ const AddUpdatePurchase = () => {
       >
         <AgGridReact rowData={Rowitems} columnDefs={columns} />
       </div>
-      <PurchaseFormTotal />
+      <PurchaseFormTotal purchaseType={purchasetype} />
       <PurchaseFormSave />
 
       {open && (

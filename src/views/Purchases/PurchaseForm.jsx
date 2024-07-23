@@ -6,11 +6,13 @@ import Cookies from 'js-cookie'
 import Styles from './PurchaseFormStyles.module.css'
 import { Box, Button } from '@mui/material'
 import { TaxPrecent } from '../../Global/Globla'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-function PurchaseForm() {
+function PurchaseForm({ handlePurchaseType, themeColore, valueDate, setvalueDate }) {
   function handleChangeSelect(e) {
-    // console.log(e.target.value)
-    //document.getElementById("formPlaintextPurchaseID").value =1
+    handlePurchaseType(e.target.value)
   }
 
   const [Stores, setStores] = useState([])
@@ -46,6 +48,26 @@ function PurchaseForm() {
         </Col>
       </Form.Group>
 
+      <Form.Group as={Row} className="mb-3">
+        <Form.Label column sm="2">
+          تاريخ الفاتورة
+        </Form.Label>
+        <Col sm="10">
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              format="YYYY-MM-DD"
+              value={valueDate}
+              onChange={(newValue) => {
+                setvalueDate(newValue)
+              }}
+              sx={{
+                WebkitTextFillColor: themeColore === 'dark' ? 'white' : 'dark',
+              }}
+            />
+          </LocalizationProvider>
+        </Col>
+      </Form.Group>
+
       <Form.Group as={Row} className="mb-3" controlId="formSelectSores">
         <Form.Label column sm="2">
           المتجر
@@ -64,7 +86,7 @@ function PurchaseForm() {
   )
 }
 
-export function PurchaseFormTotal() {
+export function PurchaseFormTotal({purchaseType}) {
   function handleCalculateResult() {
     const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
     const TotalBeforeDiscount = document.getElementById('formInputTotal')
@@ -74,7 +96,6 @@ export function PurchaseFormTotal() {
     TotalafterDiscount.value = (TotalBeforeDiscount.value - discount.value).toFixed(2)
     TotalAfterTax.value = (TotalafterDiscount.value * TaxPrecent).toFixed(2)
     Tax.value = (TotalAfterTax.value - TotalafterDiscount.value).toFixed(2)
-    console.log('fired')
   }
   return (
     <Form className={Styles['Total-form-main']}>
@@ -85,7 +106,7 @@ export function PurchaseFormTotal() {
         <Col sm="5">
           <Form.Control
             type="number"
-            readOnly={true}
+            readOnly={purchaseType == 1 ? false : true}
             defaultValue={0.0}
             onChange={handleCalculateResult}
           />
@@ -97,11 +118,7 @@ export function PurchaseFormTotal() {
           الخصم
         </Form.Label>
         <Col sm="5">
-          <Form.Control
-            type="number"
-            defaultValue={0.0}
-            onChange={() => handleCalculateResult.bind()}
-          />
+          <Form.Control type="number" defaultValue={0.0} onChange={() => handleCalculateResult()} />
         </Col>
       </Form.Group>
 

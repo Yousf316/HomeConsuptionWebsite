@@ -53,9 +53,7 @@ const Login = () => {
     }))
   }
 
-  useEffect(() => {
-    console.log(userinfo)
-  }, [])
+
 
   ClearLogined()
   return (
