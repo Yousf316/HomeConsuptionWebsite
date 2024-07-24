@@ -9,20 +9,56 @@ import { TaxPrecent } from '../../Global/Globla'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { GetٍStores } from '../../Api/StoreApi'
+import { GetPurchaseCategoriesTable, GetPurchaseSubCategoriesTable } from '../../Api/CategoriesApi'
 
-function PurchaseForm({ handlePurchaseType, themeColore, valueDate, setvalueDate }) {
+function PurchaseForm({
+  handlePurchaseType,
+  themeColore,
+  valueDate,
+  setvalueDate,
+  storeID,
+  setStoreID,
+  Category,
+  setCategory,
+  subCategory,
+  setsubCategory,
+}) {
   function handleChangeSelect(e) {
     handlePurchaseType(e.target.value)
   }
 
+  function handleChangeSelectPurchaseCategories(e) {
+    console.log(e.target.value)
+    setCategory(e.target.value)
+  }
   const [Stores, setStores] = useState([])
+  const [Categories, setCategories] = useState([])
+  const [SCategories, setSCategories] = useState([])
+
+  async function GetStores() {
+    const dataTable = await GetٍStores()
+    setStores(dataTable)
+  }
+
+  async function GetPCategories() {
+    const dataTable = await GetPurchaseCategoriesTable()
+    setCategories(dataTable)
+  }
+  async function GetPSCategories() {
+    if (Category != -1) {
+      const dataTable = await GetPurchaseSubCategoriesTable(Category)
+      dataTable.status ? setSCategories([]) : setSCategories(dataTable)
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      const dataTable = await GetٍStores()
-      setStores(dataTable)
-    }
-    fetchData()
+    GetPSCategories()
+  }, [Category])
+
+  useEffect(() => {
+    GetStores()
+    GetPCategories()
   }, [])
 
   return (
@@ -73,10 +109,50 @@ function PurchaseForm({ handlePurchaseType, themeColore, valueDate, setvalueDate
           المتجر
         </Form.Label>
         <Col sm="10">
-          <Form.Select aria-label="select Purchase Type" onChange={(e) => handleChangeSelect(e)}>
+          <Form.Select
+            aria-label="select Purchase Type"
+            value={storeID}
+            onChange={(e) => setStoreID(e.target.value)}
+          >
             {Stores.map((store) => (
               <option value={store.StoreID} key={store.StoreID}>
                 {store.StoreName}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+      </Form.Group>
+
+      <Form.Group
+        as={Row}
+        className="mb-3"
+        controlId="formSelectPurchaseCategories"
+        onChange={handleChangeSelectPurchaseCategories}
+      >
+        <Form.Label column sm="2">
+          الصنف الرئيسية
+        </Form.Label>
+        <Col sm="10">
+          <Form.Select aria-label="select Purchase Type" value={Category} onChange={ (e) => setCategory(e.target.value)}>
+            {Categories.map((category) => (
+              <option value={category.PCategoryID} key={category.PCategoryID}>
+                {category.CategoryName}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+      </Form.Group>
+
+      <Form.Group as={Row} className="mb-3" controlId="formSelectPurchaseSubCategories">
+        <Form.Label column sm="2">
+          الصنف الفرعي
+        </Form.Label>
+        <Col sm="10">
+          <Form.Select aria-label="select Purchase Type" value={subCategory} onChange={(e) => setsubCategory(e.target.value)}>
+            <option value={-1}>بدون</option>
+            {SCategories?.map((category) => (
+              <option value={category.PSCategoryID} key={category.PSCategoryID}>
+                {category.SubCategoryName}
               </option>
             ))}
           </Form.Select>
@@ -86,7 +162,7 @@ function PurchaseForm({ handlePurchaseType, themeColore, valueDate, setvalueDate
   )
 }
 
-export function PurchaseFormTotal({purchaseType}) {
+export function PurchaseFormTotal({ purchaseType }) {
   function handleCalculateResult() {
     const TotalafterDiscount = document.getElementById('formInputTotalAfterDiscount')
     const TotalBeforeDiscount = document.getElementById('formInputTotal')
@@ -168,25 +244,3 @@ export function PurchaseFormSave() {
 }
 
 export default PurchaseForm
-
-export async function GetٍStores() {
-  const token = Cookies.get('LOGIN_Info')
-
-  let data = null
-  await fetch(`//www.homecproject.somee.com/api/Stores/GetStores`, {
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Content-type': 'application/json',
-    },
-  })
-    .then((result) => {
-      let Promiseresult = result.json()
-      return Promiseresult
-    })
-    .then((finalResult) => {
-      data = finalResult
-    })
-    .catch((error) => console.error('Fetch error:', error))
-
-  return data
-}

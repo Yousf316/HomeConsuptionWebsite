@@ -15,12 +15,13 @@ export default function UserProvider({ children }) {
 
 export async function GetUserToken(UserName, Password) {
   let token = ''
+  const bodyjson = JSON.stringify({
+    username: UserName,
+    password: Password,
+  })
   await fetch('//www.homecproject.somee.com/api/Users/GetNewToken', {
     method: 'POST',
-    body: JSON.stringify({
-      username: UserName,
-      password: Password,
-    }),
+    body: bodyjson,
     headers: {
       'Content-type': 'application/json',
     },

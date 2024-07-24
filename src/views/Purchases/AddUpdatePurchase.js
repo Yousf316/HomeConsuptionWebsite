@@ -10,7 +10,7 @@ import { Button } from '@mui/material'
 import { colorthem } from '../../Global/coloreThem'
 import PurchaseForm, { PurchaseFormTotal, PurchaseFormSave } from './PurchaseForm'
 import FormDialog from './Dialogs'
-import { GetPurchasesInfo, GetPurchaseSubInfo } from './PurchaseApi'
+import { GetPurchasesInfo, GetPurchaseSubInfo } from '../../Api/PurchaseApi'
 import { TaxPrecent } from '../../Global/Globla'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
@@ -75,7 +75,6 @@ const AddUpdatePurchase = () => {
   ]
 
   const [Rowitems, setRowitems] = useState([])
-  const [isLoading, setisLoading] = useState(true)
   const { id } = useParams()
   const [open, setOpen] = useState(false)
   const [purchasetype, setpurchasetype] = useState(1)
@@ -84,6 +83,10 @@ const AddUpdatePurchase = () => {
   const color = useContext(colorthem)
   const baseBackgroundColor = color.color === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'
   const [valueDate, setvalueDate] = useState(dayjs(Date()))
+  const [IsAddNew, setIsAddNew] = useState(true)
+  const [storeID, setStoreID] = useState(1)
+  const [Category, setCategory] = useState(-1)
+  const [subCategory, setsubCategory] = useState(-1)
 
   const handleClickOpen = (number) => {
     setOpen(true)
@@ -101,9 +104,10 @@ const AddUpdatePurchase = () => {
     document.getElementById('formInputTotalAfterTax').value = dataTable.totalAfterTax
     document.getElementById('formInputDiscount').value = dataTable.discount ? dataTable.discount : 0
 
-    const SelectSores = document.getElementById('formSelectSores')
-
-    SelectSores.value = dataTable.storeID
+    //
+    setStoreID(dataTable.storeID)
+    setCategory(dataTable.pCategoryID)
+    setsubCategory(dataTable.psCategoryID ? dataTable.psCategoryID : -1)
     //
 
     const formattedDate = format(dataTable.issueDate, 'yyyy-MM-dd')
@@ -134,21 +138,27 @@ const AddUpdatePurchase = () => {
         sort: element.p_subID,
         Total: element.totalAmount, // Use actual data if available
       }))
-
       setRowitems(updatedRows)
-      setpurchasetype(dataTable.type)
     }
+    setpurchasetype((prevType) => (prevType = dataTable.type))
+    setIsAddNew(false)
   }
   function ResetPageValues() {
     document.getElementById('formPlaintextPurchaseID').value = 'لا يوجد'
+
     document.getElementById('formSelectPurchaseType').value = 1
+
     document.getElementById('formInputTotalAfterDiscount').value = 0
     document.getElementById('formInputTotalAfterTax').value = 0
     document.getElementById('formInputDiscount').value = 0
     document.getElementById('formInputTotal').value = 0
     document.getElementById('formInputTax').value = 0
     setvalueDate(dayjs(Date()))
+    AddNewPurchase()
     setRowitems([])
+    setpurchasetype(1)
+    setIsAddNew(true)
+    setsubCategory(-1)
   }
 
   function CalculateItemsTotal() {
@@ -173,23 +183,33 @@ const AddUpdatePurchase = () => {
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
-        SetPurchaseInfo(dataTable)
+        dataTable.status ? ResetPageValues() : SetPurchaseInfo(dataTable)
       }
-      const SelectSores = document.getElementById('formSelectSores')
-
-      if (SelectSores.length != 0) {
-        GetPurchaseInfo()
-      } else {
-        setisLoading((preLoading) => !preLoading)
-      }
+      GetPurchaseInfo()
     } else {
       ResetPageValues()
     }
-  }, [id, isLoading])
+  }, [id])
 
   useEffect(() => {
     CalculateItemsTotal()
   }, [Rowitems])
+
+  function AddNewPurchase() {
+    const purchaseItems = {
+      issueDate: `${valueDate.get('year')}-${valueDate.get('month') + 1}-${valueDate.get('date')}`,
+      totalBeforTax: document.getElementById('formInputTotalAfterTax').value,
+      taxAmount: document.getElementById('formInputTax').value,
+      totalAfterTax: document.getElementById('formInputTotalAfterTax').value,
+      storeID: document.getElementById('formSelectSores').value,
+      type: 0,
+      discount: 0,
+      pCategoryID: 0,
+      psCategoryID: 0,
+      userID: 0,
+    }
+    console.log(purchaseItems)
+  }
 
   function openDeleteConfirmModal(rownumber) {
     if (window.confirm('Are you sure you want to delete this user?')) {
@@ -248,6 +268,12 @@ const AddUpdatePurchase = () => {
         themeColore={color.color}
         valueDate={valueDate}
         setvalueDate={setvalueDate}
+        storeID={storeID}
+        setStoreID={setStoreID}
+        Category={Category}
+        setCategory={setCategory}
+        subCategory={subCategory}
+        setsubCategory={setsubCategory}
       />
       <div>
         <Button

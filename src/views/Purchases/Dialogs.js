@@ -13,7 +13,7 @@ import { AgGridReact } from 'ag-grid-react' // React Data Grid Component
 import 'ag-grid-community/styles/ag-grid.css' // Mandatory CSS required by the Data Grid
 import 'ag-grid-community/styles/ag-theme-quartz.min.css' // Optional Theme applied to the Data Grid
 import { colorthem } from '../../Global/coloreThem'
-import { GetItemsTable } from '../Items/ItemsApi'
+import { GetItemsTable } from '../../Api/ItemsApi'
 import NativeSelect from '@mui/material/NativeSelect'
 import { useEffect } from 'react'
 import { object } from 'prop-types'

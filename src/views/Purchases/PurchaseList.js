@@ -3,7 +3,8 @@ import { MaterialReactTable, MRT_ActionMenuItem, useMaterialReactTable } from 'm
 import { Edit, Delete } from '@mui/icons-material'
 import { createTheme, ThemeProvider } from '@mui/material'
 import { colorthem } from '../../Global/coloreThem'
-import { GetPurchasesTable } from './PurchaseApi'
+import { GetPurchasesTable } from '../../Api/PurchaseApi'
+
 
 function PurchaseList() {
   const columns = useMemo(
