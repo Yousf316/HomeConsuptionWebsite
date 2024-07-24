@@ -133,7 +133,11 @@ function PurchaseForm({
           الصنف الرئيسية
         </Form.Label>
         <Col sm="10">
-          <Form.Select aria-label="select Purchase Type" value={Category} onChange={ (e) => setCategory(e.target.value)}>
+          <Form.Select
+            aria-label="select Purchase Type"
+            value={Category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
             {Categories.map((category) => (
               <option value={category.PCategoryID} key={category.PCategoryID}>
                 {category.CategoryName}
@@ -148,7 +152,11 @@ function PurchaseForm({
           الصنف الفرعي
         </Form.Label>
         <Col sm="10">
-          <Form.Select aria-label="select Purchase Type" value={subCategory} onChange={(e) => setsubCategory(e.target.value)}>
+          <Form.Select
+            aria-label="select Purchase Type"
+            value={subCategory}
+            onChange={(e) => setsubCategory(e.target.value)}
+          >
             <option value={-1}>بدون</option>
             {SCategories?.map((category) => (
               <option value={category.PSCategoryID} key={category.PSCategoryID}>
@@ -228,14 +236,18 @@ export function PurchaseFormTotal({ purchaseType }) {
   )
 }
 
-export function PurchaseFormSave() {
+export function PurchaseFormSave({ SaveOpreation }) {
   return (
     <Form className={Styles['Save-form-main']}>
       <div className={Styles['div-save-buttons']}>
         <Button variant="outlined" style={{ minWidth: '150px', margin: '25px' }}>
           الغاء
         </Button>
-        <Button variant="contained" style={{ minWidth: '150px', margin: '25px' }}>
+        <Button
+          variant="contained"
+          style={{ minWidth: '150px', margin: '25px' }}
+          onClick={() =>SaveOpreation()}
+        >
           حفظ
         </Button>
       </div>

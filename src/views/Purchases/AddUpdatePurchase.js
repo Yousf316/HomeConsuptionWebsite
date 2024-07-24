@@ -10,10 +10,11 @@ import { Button } from '@mui/material'
 import { colorthem } from '../../Global/coloreThem'
 import PurchaseForm, { PurchaseFormTotal, PurchaseFormSave } from './PurchaseForm'
 import FormDialog from './Dialogs'
-import { GetPurchasesInfo, GetPurchaseSubInfo } from '../../Api/PurchaseApi'
+import { GetPurchasesInfo, GetPurchaseSubInfo, SetNewPurchases } from '../../Api/PurchaseApi'
 import { TaxPrecent } from '../../Global/Globla'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
+import { UserContext } from '../../Global/user'
 
 const AddUpdatePurchase = () => {
   const columns = [
@@ -81,11 +82,12 @@ const AddUpdatePurchase = () => {
   const [UpdateItemRownInfo, setUpdateItemRowInfo] = useState(null)
   const [Typeitemsrow, setTypeitemsrow] = useState(1) // 1 create, 2 edite
   const color = useContext(colorthem)
+  const Userinfo = useContext(UserContext)
   const baseBackgroundColor = color.color === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'
   const [valueDate, setvalueDate] = useState(dayjs(Date()))
   const [IsAddNew, setIsAddNew] = useState(true)
   const [storeID, setStoreID] = useState(1)
-  const [Category, setCategory] = useState(-1)
+  const [Category, setCategory] = useState(1)
   const [subCategory, setsubCategory] = useState(-1)
 
   const handleClickOpen = (number) => {
@@ -139,6 +141,8 @@ const AddUpdatePurchase = () => {
         Total: element.totalAmount, // Use actual data if available
       }))
       setRowitems(updatedRows)
+    } else {
+      setRowitems([])
     }
     setpurchasetype((prevType) => (prevType = dataTable.type))
     setIsAddNew(false)
@@ -154,11 +158,11 @@ const AddUpdatePurchase = () => {
     document.getElementById('formInputTotal').value = 0
     document.getElementById('formInputTax').value = 0
     setvalueDate(dayjs(Date()))
-    AddNewPurchase()
     setRowitems([])
     setpurchasetype(1)
     setIsAddNew(true)
     setsubCategory(-1)
+    setCategory(1)
   }
 
   function CalculateItemsTotal() {
@@ -183,6 +187,8 @@ const AddUpdatePurchase = () => {
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
+        console.log(dataTable)
+
         dataTable.status ? ResetPageValues() : SetPurchaseInfo(dataTable)
       }
       GetPurchaseInfo()
@@ -195,20 +201,58 @@ const AddUpdatePurchase = () => {
     CalculateItemsTotal()
   }, [Rowitems])
 
-  function AddNewPurchase() {
-    const purchaseItems = {
-      issueDate: `${valueDate.get('year')}-${valueDate.get('month') + 1}-${valueDate.get('date')}`,
-      totalBeforTax: document.getElementById('formInputTotalAfterTax').value,
-      taxAmount: document.getElementById('formInputTax').value,
-      totalAfterTax: document.getElementById('formInputTotalAfterTax').value,
-      storeID: document.getElementById('formSelectSores').value,
-      type: 0,
-      discount: 0,
-      pCategoryID: 0,
-      psCategoryID: 0,
-      userID: 0,
+  async function AddNewPurchase() {
+    const _totalAfterTax = Number(document.getElementById('formInputTotalAfterTax').value)
+    const _discount = Number(document.getElementById('formInputDiscount').value)
+    const _taxAmount = Number(document.getElementById('formInputTax').value)
+    const _totalBeforTax = Number(document.getElementById('formInputTotalAfterDiscount').value)
+
+    const purchaseHeader = {
+      issueDate: `${valueDate.toISOString()}`,
+      totalBeforTax: _totalBeforTax,
+      taxAmount: _taxAmount,
+      totalAfterTax: _totalAfterTax,
+      storeID: storeID,
+      type: purchasetype,
+      discount: _discount == 0 ? null : _discount,
+      pCategoryID: Category,
+      psCategoryID: subCategory == -1 ? null : subCategory,
+      userID: Userinfo.userInfo.UserID,
     }
-    console.log(purchaseItems)
+
+    const newPurchaseinfo = await SetNewPurchases(purchaseHeader)
+    console.log(newPurchaseinfo.purchaseID)
+    //
+    if (purchasetype == 2) {
+      const purchaseItems = []
+
+      Rowitems.forEach((Row) => {
+        const newItem = {
+          purchaseID: 0,
+          p_subID: Row.sort,
+          itemID: Row.id,
+          itemName: Row.itemName,
+          description: Row.description == '' ? null : Row.description,
+          itemPrice: Row.PricePerItem,
+          quantity: Row.Quantity,
+
+          totalAmount: Row.Total,
+        }
+        purchaseItems.push(newItem)
+      })
+      console.log(purchaseItems)
+    }
+    console.log(purchaseHeader)
+    console.log(Userinfo)
+  }
+
+ async function SaveOpreation() {
+    if (IsAddNew) {
+      AddNewPurchase()
+    } else {
+      console.log(IsAddNew)
+
+    }
   }
 
   function openDeleteConfirmModal(rownumber) {
@@ -292,7 +336,7 @@ const AddUpdatePurchase = () => {
         <AgGridReact rowData={Rowitems} columnDefs={columns} />
       </div>
       <PurchaseFormTotal purchaseType={purchasetype} />
-      <PurchaseFormSave />
+      <PurchaseFormSave SaveOpreation={SaveOpreation} />
 
       {open && (
         <FormDialog

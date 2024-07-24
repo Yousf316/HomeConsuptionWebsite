@@ -68,9 +68,10 @@ export async function GetPurchasesTable(PageNumber) {
 
 export async function SetNewPurchases(PurchaseInfo) {
   const token = Cookies.get('LOGIN_Info')
-
   let data = null
   await fetch(`//www.homecproject.somee.com/api/Purchase/NewPurchase`, {
+    method: 'POST',
+    body: JSON.stringify(PurchaseInfo),
     headers: {
       Authorization: 'Bearer ' + token,
       'Content-type': 'application/json',
@@ -109,7 +110,6 @@ export async function SetNewSubPurchases(PurchaseInfo) {
 
   return data
 }
-
 
 export async function SetUpdatePurchases(PurchaseInfo) {
   const token = Cookies.get('LOGIN_Info')
