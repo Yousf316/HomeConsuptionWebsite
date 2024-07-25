@@ -89,11 +89,38 @@ export async function SetNewPurchases(PurchaseInfo) {
   return data
 }
 
-export async function SetNewSubPurchases(PurchaseInfo) {
+export async function SetNewSubPurchases(PurchaseInfo, PurchaseID) {
   const token = Cookies.get('LOGIN_Info')
 
   let data = null
-  await fetch(`//www.homecproject.somee.com/api/Purchase/GetPurchasesTable/${PageNumber}`, {
+  await fetch(`//www.homecproject.somee.com/api/PurchaseSub/NewPurchaseSub/${PurchaseID}`, {
+    method: 'POST',
+    body: JSON.stringify(PurchaseInfo),
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'Content-type': 'application/json',
+    },
+  })
+    .then((result) => {
+      let Promiseresult = result.json()
+      return Promiseresult
+    })
+    .then((finalResult) => {
+      data = finalResult
+      console.log(data)
+    })
+    .catch((error) => console.error('Fetch error:', error))
+
+  return data
+}
+
+export async function SetUpdatePurchases(PurchaseInfo, PurchaseID) {
+  const token = Cookies.get('LOGIN_Info')
+
+  let data = null
+  await fetch(`//www.homecproject.somee.com/api/Purchase/${PurchaseID}`, {
+    method: 'PUT',
+    body: JSON.stringify(PurchaseInfo),
     headers: {
       Authorization: 'Bearer ' + token,
       'Content-type': 'application/json',
@@ -111,33 +138,13 @@ export async function SetNewSubPurchases(PurchaseInfo) {
   return data
 }
 
-export async function SetUpdatePurchases(PurchaseInfo) {
+export async function SetUpdateSubPurchases(PurchaseInfo, PurchaseID) {
   const token = Cookies.get('LOGIN_Info')
 
   let data = null
-  await fetch(`//www.homecproject.somee.com/api/Purchase/GetPurchasesTable/${PageNumber}`, {
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Content-type': 'application/json',
-    },
-  })
-    .then((result) => {
-      let Promiseresult = result.json()
-      return Promiseresult
-    })
-    .then((finalResult) => {
-      data = finalResult
-    })
-    .catch((error) => console.error('Fetch error:', error))
-
-  return data
-}
-
-export async function SetUpdateSubPurchases(PurchaseInfo) {
-  const token = Cookies.get('LOGIN_Info')
-
-  let data = null
-  await fetch(`//www.homecproject.somee.com/api/Purchase/GetPurchasesTable/${PageNumber}`, {
+  await fetch(`//www.homecproject.somee.com/api/PurchaseSub/UpdatePurchaseSub/${PurchaseID}`, {
+    method: 'PUT',
+    body: JSON.stringify(PurchaseInfo),
     headers: {
       Authorization: 'Bearer ' + token,
       'Content-type': 'application/json',

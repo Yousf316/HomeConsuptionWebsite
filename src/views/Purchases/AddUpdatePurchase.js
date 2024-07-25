@@ -10,7 +10,14 @@ import { Button } from '@mui/material'
 import { colorthem } from '../../Global/coloreThem'
 import PurchaseForm, { PurchaseFormTotal, PurchaseFormSave } from './PurchaseForm'
 import FormDialog from './Dialogs'
-import { GetPurchasesInfo, GetPurchaseSubInfo, SetNewPurchases } from '../../Api/PurchaseApi'
+import {
+  GetPurchasesInfo,
+  GetPurchaseSubInfo,
+  SetNewPurchases,
+  SetNewSubPurchases,
+  SetUpdatePurchases,
+  SetUpdateSubPurchases,
+} from '../../Api/PurchaseApi'
 import { TaxPrecent } from '../../Global/Globla'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
@@ -129,20 +136,19 @@ const AddUpdatePurchase = () => {
     //
     if (dataTable.type == 2) {
       const PurchaseSub = await GetPurchaseSubInfo(id)
-
-      const updatedRows = PurchaseSub.map((element, key) => ({
-        key: key,
-        id: String(element.itemID),
-        itemName: element.itemName, // Use actual data if available
-        description: element.description, // Use actual data if available
-        Quantity: element.quantity, // Use actual data if available
-        PricePerItem: element.itemPrice,
-        sort: element.p_subID,
-        Total: element.totalAmount, // Use actual data if available
-      }))
-      setRowitems(updatedRows)
-    } else {
-      setRowitems([])
+      if (PurchaseSub.status == null) {
+        const updatedRows = PurchaseSub.map((element, key) => ({
+          key: key,
+          id: String(element.itemID),
+          itemName: element.itemName, // Use actual data if available
+          description: element.description, // Use actual data if available
+          Quantity: element.quantity, // Use actual data if available
+          PricePerItem: element.itemPrice,
+          sort: element.p_subID,
+          Total: element.totalAmount, // Use actual data if available
+        }))
+        setRowitems(updatedRows)
+      }
     }
     setpurchasetype((prevType) => (prevType = dataTable.type))
     setIsAddNew(false)
@@ -184,6 +190,7 @@ const AddUpdatePurchase = () => {
   }
 
   useEffect(() => {
+    ResetPageValues()
     if (id != 0) {
       async function GetPurchaseInfo() {
         const dataTable = await GetPurchasesInfo(id)
@@ -191,15 +198,59 @@ const AddUpdatePurchase = () => {
 
         dataTable.status ? ResetPageValues() : SetPurchaseInfo(dataTable)
       }
+
       GetPurchaseInfo()
-    } else {
-      ResetPageValues()
     }
   }, [id])
 
   useEffect(() => {
     CalculateItemsTotal()
   }, [Rowitems])
+
+  async function UpdatePurchase() {
+    const _totalAfterTax = Number(document.getElementById('formInputTotalAfterTax').value)
+    const _discount = Number(document.getElementById('formInputDiscount').value)
+    const _taxAmount = Number(document.getElementById('formInputTax').value)
+    const _totalBeforTax = Number(document.getElementById('formInputTotalAfterDiscount').value)
+    const PurchaseID = id
+    const purchaseHeader = {
+      issueDate: `${valueDate.toISOString()}`,
+      totalBeforTax: _totalBeforTax,
+      taxAmount: _taxAmount,
+      totalAfterTax: _totalAfterTax,
+      storeID: storeID,
+      type: purchasetype,
+      discount: _discount == 0 ? null : _discount,
+      pCategoryID: Category,
+      psCategoryID: subCategory == -1 ? null : subCategory,
+      userID: Userinfo.userInfo.UserID,
+    }
+
+    await SetUpdatePurchases(purchaseHeader, PurchaseID)
+
+    //
+    if (purchasetype == 2) {
+      const purchaseItems = []
+
+      Rowitems.forEach((Row) => {
+        const newItem = {
+          purchaseID: PurchaseID,
+          p_subID: Row.sort,
+          itemID: Row.id,
+          itemName: Row.itemName,
+          description: Row.description == '' ? null : Row.description,
+          itemPrice: Row.PricePerItem,
+          quantity: Row.Quantity,
+          size: null,
+          totalAmount: Row.Total,
+        }
+        purchaseItems.push(newItem)
+      })
+      const subPurchases = await SetUpdateSubPurchases(purchaseItems, PurchaseID)
+      console.log(subPurchases)
+    }
+    console.log(purchaseHeader)
+  }
 
   async function AddNewPurchase() {
     const _totalAfterTax = Number(document.getElementById('formInputTotalAfterTax').value)
@@ -221,37 +272,37 @@ const AddUpdatePurchase = () => {
     }
 
     const newPurchaseinfo = await SetNewPurchases(purchaseHeader)
-    console.log(newPurchaseinfo.purchaseID)
+    const PurchaseID = newPurchaseinfo.purchaseID
+    document.getElementById('formPlaintextPurchaseID').value = `${PurchaseID}`
+
     //
     if (purchasetype == 2) {
       const purchaseItems = []
 
       Rowitems.forEach((Row) => {
         const newItem = {
-          purchaseID: 0,
+          purchaseID: PurchaseID,
           p_subID: Row.sort,
           itemID: Row.id,
           itemName: Row.itemName,
           description: Row.description == '' ? null : Row.description,
           itemPrice: Row.PricePerItem,
           quantity: Row.Quantity,
-
+          size: null,
           totalAmount: Row.Total,
         }
         purchaseItems.push(newItem)
       })
-      console.log(purchaseItems)
+      const subPurchases = await SetNewSubPurchases(purchaseItems, PurchaseID)
+      console.log(subPurchases)
     }
     console.log(purchaseHeader)
-    console.log(Userinfo)
   }
-
- async function SaveOpreation() {
+  async function SaveOpreation() {
     if (IsAddNew) {
       AddNewPurchase()
     } else {
-      console.log(IsAddNew)
-
+      UpdatePurchase()
     }
   }
 

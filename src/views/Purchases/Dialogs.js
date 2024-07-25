@@ -105,7 +105,7 @@ export default function FormDialog({
     const ValidationErrors = {}
     const PricePerItem = document.getElementById('PricePerItem').value
     const ItemsID = document.getElementById('ItemsID').value
-    //const ItemName = document.getElementById('ItemName').value
+
     const Quantity = document.getElementById('Quantity').value
 
     if (parseFloat(PricePerItem) <= 0) {
