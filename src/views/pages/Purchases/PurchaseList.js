@@ -18,6 +18,10 @@ function PurchaseList() {
         header: 'تاريخ الأصدار',
       },
       {
+        accessorKey: 'StoreName',
+        header: 'اسم المتجر',
+      },
+      {
         accessorKey: 'Purchase_Type',
         header: 'النوع',
       },
@@ -40,16 +44,17 @@ function PurchaseList() {
     async function fetchData() {
       const dataTable = await GetPurchasesTable(pagination.pageIndex + 1)
       const dtPurchase = JSON.parse(dataTable.purchasejson)
-
+        console.log(dtPurchase)
       const updatedRows = dtPurchase.map((element, key) => ({
         key: key,
         id: String(element.PurchaseID),
-        Purchase_Date: new Date(element.IssueDate).toLocaleDateString(), // Use actual data if available
-        Purchase_Type: element.TypeName, // Use actual data if available
-        Purchase_Total: element.TotalAfterTax, // Use actual data if available
+        Purchase_Date: new Date(element.IssueDate).toLocaleDateString(),
+        Purchase_Type: element.TypeName,
+        Purchase_Total: element.TotalAfterTax,
+        StoreName: element.StoreName,
       }))
 
-      setpagecount((prev) => (prev = pagination.pageIndex + 2))
+      setpagecount((prev) => (prev = pagination.pageIndex + 5))
       // Update state once with all changes
       setRowitems(updatedRows)
     }
@@ -98,14 +103,14 @@ function PurchaseList() {
           <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
             icon={<Edit />}
             key="edit"
-            label="Edit"
+            label="تعديل"
             onClick={() => handleClickEditePurchase(row.original.id)}
             table={table}
           />,
           <MRT_ActionMenuItem
             icon={<Delete />}
             key="delete"
-            label="Delete"
+            label="حذف"
             onClick={() => handleClickEditePurchase(row.original.id)}
             table={table}
           />,
