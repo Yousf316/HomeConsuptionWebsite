@@ -2,23 +2,21 @@ import React, { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
-import Cookies from 'js-cookie'
 import Styles from './PurchaseFormStyles.module.css'
 import { Box, Button } from '@mui/material'
 import { TaxPrecent } from '../../Global/Globla'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { GetٍStores } from '../../Api/StoreApi'
 import { GetPurchaseCategoriesTable, GetPurchaseSubCategoriesTable } from '../../Api/CategoriesApi'
+import TransitionAlerts from '../Alert'
 
 function PurchaseForm({
   handlePurchaseType,
   themeColore,
   valueDate,
   setvalueDate,
-  storeID,
-  setStoreID,
+  SetOpenStoreDialog,
   Category,
   setCategory,
   subCategory,
@@ -29,17 +27,10 @@ function PurchaseForm({
   }
 
   function handleChangeSelectPurchaseCategories(e) {
-    console.log(e.target.value)
     setCategory(e.target.value)
   }
-  const [Stores, setStores] = useState([])
   const [Categories, setCategories] = useState([])
   const [SCategories, setSCategories] = useState([])
-
-  async function GetStores() {
-    const dataTable = await GetٍStores()
-    setStores(dataTable)
-  }
 
   async function GetPCategories() {
     const dataTable = await GetPurchaseCategoriesTable()
@@ -57,18 +48,17 @@ function PurchaseForm({
   }, [Category])
 
   useEffect(() => {
-    GetStores()
     GetPCategories()
   }, [])
 
   return (
     <Form>
-      <Form.Group as={Row} className="mb-3" controlId="formPlaintextPurchaseID">
+      <Form.Group as={Row} controlId="formPlaintextPurchaseID">
         <Form.Label column sm="2">
           رقم الفاتورة
         </Form.Label>
-        <Col sm="10">
-          <Form.Control plaintext readOnly defaultValue="لا يوجد" />
+        <Col sm="3">
+          <Form.Control sm="2" plaintext readOnly defaultValue="لا يوجد" />
         </Col>
       </Form.Group>
 
@@ -104,23 +94,22 @@ function PurchaseForm({
         </Col>
       </Form.Group>
 
-      <Form.Group as={Row} className="mb-3" controlId="formSelectSores">
+      <Form.Group as={Row} className="mb-3" controlId="formTextSores">
         <Form.Label column sm="2">
           المتجر
         </Form.Label>
-        <Col sm="10">
-          <Form.Select
-            aria-label="select Purchase Type"
-            value={storeID}
-            onChange={(e) => setStoreID(e.target.value)}
-          >
-            {Stores.map((store) => (
-              <option value={store.StoreID} key={store.StoreID}>
-                {store.StoreName}
-              </option>
-            ))}
-          </Form.Select>
+        <Col sm="3">
+          <Form.Control sm="2" plaintext readOnly defaultValue="لا يوجد" />
         </Col>
+        <Form.Label column sm="2">
+          <Button
+            style={{ minWidth: '150px' }}
+            variant="contained"
+            onClick={() => SetOpenStoreDialog()}
+          >
+            قائمة المتاجر
+          </Button>
+        </Form.Label>
       </Form.Group>
 
       <Form.Group
@@ -181,6 +170,21 @@ export function PurchaseFormTotal({ purchaseType }) {
     TotalAfterTax.value = (TotalafterDiscount.value * TaxPrecent).toFixed(2)
     Tax.value = (TotalAfterTax.value - TotalafterDiscount.value).toFixed(2)
   }
+
+  function ConvertTotalWithTax() {
+    //
+    const inputElement = document.getElementById('formInputTotal')
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value',
+    ).set
+    nativeInputValueSetter.call(inputElement, (inputElement.value / TaxPrecent).toFixed(2))
+
+    const event = new Event('input', { bubbles: true })
+    inputElement.dispatchEvent(event)
+    //
+  }
   return (
     <Form className={Styles['Total-form-main']}>
       <Form.Group as={Row} className={Styles['Total-form']} controlId="formInputTotal">
@@ -194,6 +198,14 @@ export function PurchaseFormTotal({ purchaseType }) {
             defaultValue={0.0}
             onChange={handleCalculateResult}
           />
+        </Col>
+      </Form.Group>
+      <Form.Group as={Row} className={Styles['Total-form']} controlId="formButtonConvertion">
+        <Form.Label column sm="1"></Form.Label>
+        <Col sm="5">
+          <Button variant="outlined" onClick={() => ConvertTotalWithTax()}>
+            تحويل المجوع لشامل الضريبة
+          </Button>
         </Col>
       </Form.Group>
 
@@ -237,6 +249,9 @@ export function PurchaseFormTotal({ purchaseType }) {
 }
 
 export function PurchaseFormSave({ SaveOpreation }) {
+  const [openAlert, setopenAlert] = React.useState(false)
+  const [severityType, setseverityType] = React.useState('')
+  const [MessageAlert, setMessageAlert] = React.useState('')
   return (
     <Form className={Styles['Save-form-main']}>
       <div className={Styles['div-save-buttons']}>
@@ -246,10 +261,26 @@ export function PurchaseFormSave({ SaveOpreation }) {
         <Button
           variant="contained"
           style={{ minWidth: '150px', margin: '25px' }}
-          onClick={() =>SaveOpreation()}
+          onClick={async () => {
+            if (await SaveOpreation()) {
+              setseverityType('success')
+              setMessageAlert('تمت العملية بنجاح')
+            } else {
+              setseverityType('error')
+              setMessageAlert('فشلت العملية')
+
+            }
+            setopenAlert(true)
+          }}
         >
           حفظ
         </Button>
+        <TransitionAlerts
+          open={openAlert}
+          setOpen={setopenAlert}
+          Message={MessageAlert}
+          severityType={severityType}
+        />
       </div>
     </Form>
   )

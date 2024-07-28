@@ -1,8 +1,8 @@
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
-const PurchaseList = React.lazy(() => import('./views/Purchases/PurchaseList'))
-const Purchase = React.lazy(() => import('./views/Purchases/AddUpdatePurchase'))
+const PurchaseList = React.lazy(() => import('./views/pages/Purchases/PurchaseList'))
+const Purchase = React.lazy(() => import('./views/pages/Purchases/AddUpdatePurchase'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },

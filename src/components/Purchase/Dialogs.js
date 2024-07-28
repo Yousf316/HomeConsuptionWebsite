@@ -17,6 +17,7 @@ import { GetItemsTable } from '../../Api/ItemsApi'
 import NativeSelect from '@mui/material/NativeSelect'
 import { useEffect } from 'react'
 import { object } from 'prop-types'
+import { GetٍStores } from '../../Api/StoreApi'
 
 export default function FormDialog({
   open,
@@ -26,7 +27,7 @@ export default function FormDialog({
   handleUpdateitem,
   UpdateItemRownInfo,
 }) {
-  const [openStores, setopenStores] = React.useState(false)
+  const [openItems, setopenItems] = React.useState(false)
   const [ItemInfo, seItemInfo] = React.useState(null)
   const [isLoading, setisLoading] = React.useState(false)
   const [errors, setErrors] = React.useState({})
@@ -50,7 +51,6 @@ export default function FormDialog({
   }, [ItemInfo])
 
   useEffect(() => {
-
     if (document.getElementById('PricePerItem') != null) {
       GetItemInfo()
     } else {
@@ -93,12 +93,12 @@ export default function FormDialog({
     handleUpdateitem(UpdateItem, UpdateItemRownInfo.sort)
   }
 
-  const handleClickOpenStores = () => {
-    setopenStores(true)
+  const handleClickOpenItems = () => {
+    setopenItems(true)
   }
 
-  const handleCloseStores = () => {
-    setopenStores(false)
+  const handleCloseItems = () => {
+    setopenItems(false)
   }
 
   function IsValid() {
@@ -131,10 +131,10 @@ export default function FormDialog({
 
   return (
     <React.Fragment>
-      <FormDialogStores
+      <FormDialogItems
         seItemInfo={seItemInfo}
-        openStores={openStores}
-        handleCloseStores={handleCloseStores}
+        openItems={openItems}
+        handleCloseItems={handleCloseItems}
       />
       <Dialog
         open={open}
@@ -202,7 +202,7 @@ export default function FormDialog({
             spellCheck
             defaultValue={' '}
           />
-          <Button variant="contained" onClick={() => handleClickOpenStores()}>
+          <Button variant="contained" onClick={() => handleClickOpenItems()}>
             اختر المنتج
           </Button>
           <TextField
@@ -231,7 +231,7 @@ export default function FormDialog({
   )
 }
 
-export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) {
+function FormDialogItems({ openItems, handleCloseItems, seItemInfo }) {
   const columns = [
     {
       field: 'select',
@@ -254,6 +254,8 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
 
     {
       field: 'itemName',
+      filter: true,
+
       headerName: 'اسم المنتج',
     },
     {
@@ -269,7 +271,7 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
 
   function handleSelectItem(ItemInfo) {
     seItemInfo(ItemInfo)
-    handleCloseStores()
+    handleCloseItems()
   }
 
   function handleChangePage(PageNumber) {
@@ -300,13 +302,13 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
   }
 
   React.useEffect(() => {
-    if (openStores === true) GetItemListInfo()
-  }, [openStores, CurrentPage])
+    if (openItems === true) GetItemListInfo()
+  }, [openItems, CurrentPage])
 
   return (
     <Dialog
-      open={openStores}
-      onClose={handleCloseStores}
+      open={openItems}
+      onClose={handleCloseItems}
       PaperProps={{
         component: 'form',
         // onSubmit: ,
@@ -315,7 +317,7 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
     >
       <DialogTitle>المنتج</DialogTitle>
       <DialogContent>
-        <TextField
+        {/* <TextField
           margin="dense"
           id="ItemName"
           name="ItemName"
@@ -324,7 +326,7 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
           fullWidth
           variant="filled"
           spellCheck
-        />
+        /> */}
         <div
           className={baseBackgroundColor} // applying the Data Grid theme
           style={{ height: 400 }} // the Data Grid will fill the size of the parent container
@@ -341,6 +343,97 @@ export function FormDialogStores({ openStores, handleCloseStores, seItemInfo }) 
         >
           {renderedItems}
         </NativeSelect>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseItems}>الغاء</Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+export function FormDialogStores({ openStores, handleCloseStores, setStoreInfo }) {
+  const columns = [
+    {
+      field: 'select',
+      headerName: 'لختيار',
+      cellRenderer: (RowInfo) => {
+        return (
+          <>
+            <Button variant="contained" onClick={() => handleSelectItem(RowInfo.data)}>
+              اختيار
+            </Button>
+          </>
+        )
+      },
+    },
+    {
+      field: 'StoreLocation',
+      headerName: 'الموقع',
+    },
+    {
+      field: 'StoreName',
+      filter: true,
+
+      headerName: 'اسم المتجر',
+    },
+    {
+      field: 'StoreID',
+      headerName: 'رقم المتجر',
+    },
+  ]
+  const color = React.useContext(colorthem)
+  const baseBackgroundColor = color.color === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'
+  const [Rowitems, setRowitems] = React.useState([])
+  //const [renderedPages, setrenderedPages] = React.useState([])
+  //const [CurrentPage, setCurrentPage] = React.useState(1)
+
+  function handleSelectItem(StoreInfo) {
+    setStoreInfo((previngo) => ({
+      ...previngo,
+      storeID: StoreInfo.StoreID,
+      storeName: StoreInfo.StoreName,
+    }))
+    handleCloseStores()
+  }
+
+  // function handleChangePage(PageNumber) {
+  //   setCurrentPage(PageNumber)
+  // }
+  async function GetStoreListInfo() {
+    const dataTable = await GetٍStores()
+
+    const ListStores = dataTable.map((element, key) => ({
+      key: key,
+      StoreID: String(element.StoreID),
+      StoreLocation: element.StoreLocation,
+      StoreName: element.StoreName,
+    }))
+    setRowitems(ListStores)
+  }
+
+  React.useEffect(() => {
+    if (openStores === true) GetStoreListInfo()
+  }, [openStores])
+
+  return (
+    <Dialog
+      open={openStores}
+      onClose={handleCloseStores}
+      PaperProps={{
+        component: 'form',
+        // onSubmit: ,
+      }}
+      fullWidth
+    >
+      <DialogTitle>قائمة المتاجر</DialogTitle>
+      <DialogContent>
+
+        <div
+          className={baseBackgroundColor} // applying the Data Grid theme
+          style={{ height: 400 }} // the Data Grid will fill the size of the parent container
+        >
+          <AgGridReact rowData={Rowitems} columnDefs={columns} />
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseStores}>الغاء</Button>

@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo, useContext } from 'react'
 import { MaterialReactTable, MRT_ActionMenuItem, useMaterialReactTable } from 'material-react-table'
 import { Edit, Delete } from '@mui/icons-material'
 import { createTheme, ThemeProvider } from '@mui/material'
-import { colorthem } from '../../Global/coloreThem'
-import { GetPurchasesTable } from '../../Api/PurchaseApi'
+import { colorthem } from '../../../Global/coloreThem'
+import { GetPurchasesTable } from '../../../Api/PurchaseApi'
 
 
 function PurchaseList() {
