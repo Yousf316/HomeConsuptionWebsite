@@ -3,8 +3,8 @@ import { MaterialReactTable, MRT_ActionMenuItem, useMaterialReactTable } from 'm
 import { Edit, Delete } from '@mui/icons-material'
 import { createTheme, ThemeProvider } from '@mui/material'
 import { colorthem } from '../../../Global/coloreThem'
-import { GetPurchasesTable } from '../../../Api/PurchaseApi'
-
+import { DeletePurchases, GetPurchasesTable } from '../../../Api/PurchaseApi'
+import TransitionAlerts from '../../../components/Alert'
 
 function PurchaseList() {
   const columns = useMemo(
@@ -39,12 +39,13 @@ function PurchaseList() {
     //customize the default page size
   })
   const [pagecount, setpagecount] = useState(-1)
-
+  const [openAlert, setopenAlert] = React.useState(false)
+  const [severityType, setseverityType] = React.useState('')
+  const [MessageAlert, setMessageAlert] = React.useState('')
   useEffect(() => {
     async function fetchData() {
       const dataTable = await GetPurchasesTable(pagination.pageIndex + 1)
       const dtPurchase = JSON.parse(dataTable.purchasejson)
-        console.log(dtPurchase)
       const updatedRows = dtPurchase.map((element, key) => ({
         key: key,
         id: String(element.PurchaseID),
@@ -86,37 +87,62 @@ function PurchaseList() {
   const handleClickEditePurchase = (id) => {
     window.location.hash = `/home/Purchase/${id}`
   }
+  const handleClickDeletePurchase = async (id) => {
+    const DeletedPurchase = await DeletePurchases(id)
+    if (DeletedPurchase != null) {
+      setseverityType('success')
+      setMessageAlert('تمت العملية بنجاح')
+    } else {
+      setseverityType('error')
+      setMessageAlert('فشلت العملية')
+    }
+    setopenAlert(true)
+  }
   // ...
 
   return (
-    <ThemeProvider theme={theme}>
-      <MaterialReactTable
-        columns={columns}
-        data={Rowitems}
-        enableRowActions
-        manualPagination={true}
-        pageCount={pagecount}
-        onPaginationChange={setPagination} //hoist pagination state to your state when it changes internally
-        state={{ pagination }}
-        paginationDisplayMode={'pages'}
-        renderRowActionMenuItems={({ row, table }) => [
-          <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
-            icon={<Edit />}
-            key="edit"
-            label="تعديل"
-            onClick={() => handleClickEditePurchase(row.original.id)}
-            table={table}
-          />,
-          <MRT_ActionMenuItem
-            icon={<Delete />}
-            key="delete"
-            label="حذف"
-            onClick={() => handleClickEditePurchase(row.original.id)}
-            table={table}
-          />,
-        ]}
+    <>
+      <TransitionAlerts
+        open={openAlert}
+        setOpen={setopenAlert}
+        Message={MessageAlert}
+        severityType={severityType}
       />
-    </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <MaterialReactTable
+          columns={columns}
+          data={Rowitems}
+          enableRowActions
+          manualPagination={true}
+          pageCount={pagecount}
+          onPaginationChange={setPagination} //hoist pagination state to your state when it changes internally
+          state={{ pagination }}
+          paginationDisplayMode={'pages'}
+          renderRowActionMenuItems={({ row, table }) => [
+            <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+              icon={<Edit />}
+              key="edit"
+              label="تعديل"
+              onClick={() => handleClickEditePurchase(row.original.id)}
+              table={table}
+            />,
+            <MRT_ActionMenuItem
+              icon={<Delete />}
+              key="delete"
+              label="حذف"
+              onClick={async () => {
+                if (window.confirm(`هل انت متاكد من حذف الفاتورة رقم : ${row.original.id} ؟ `))
+                {
+                await handleClickDeletePurchase(row.original.id)
+
+                }
+              }}
+              table={table}
+            />,
+          ]}
+        />
+      </ThemeProvider>
+    </>
   )
 }
 
