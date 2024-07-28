@@ -49,7 +49,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'أدراج متجر جديد',
-        to: '/base/breadcrumbs',
+        to: '/home/Store/0',
       },
       {
         component: CNavItem,
