@@ -17,7 +17,7 @@ import { GetItemsTable } from '../../Api/ItemsApi'
 import NativeSelect from '@mui/material/NativeSelect'
 import { useEffect } from 'react'
 import { object } from 'prop-types'
-import { GetٍStores } from '../../Api/StoreApi'
+import { GetStores } from '../../Api/StoreApi'
 
 export default function FormDialog({
   open,
@@ -400,7 +400,7 @@ export function FormDialogStores({ openStores, handleCloseStores, setStoreInfo }
   //   setCurrentPage(PageNumber)
   // }
   async function GetStoreListInfo() {
-    const dataTable = await GetٍStores()
+    const dataTable = await GetStores()
 
     const ListStores = dataTable.map((element, key) => ({
       key: key,
