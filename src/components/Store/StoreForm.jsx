@@ -13,7 +13,7 @@ export default function StoreForm({ id }) {
   const [storeInfo, setstoreInfo] = useState({ storeID: 'لا يوجد', storeName: '', location: '' })
 
   function SetStoreInfo(StoreInfo) {
-    console.log(StoreInfo)
+
     setstoreInfo((previnfo) => ({
       ...previnfo,
       storeID: id,
@@ -32,9 +32,10 @@ export default function StoreForm({ id }) {
     setIsAddNew(true)
   }
   function ChangeStoreNameValue(Name) {
-    console.log(Name)
     setstoreInfo({ ...storeInfo, storeName: Name })
-    console.log(storeInfo)
+  }
+  function ChangeLocationValue(Name) {
+    setstoreInfo({ ...storeInfo, location: Name })
   }
   async function GetStoreINfo() {
     const storeinfo = await GetStoreByID(id)
@@ -46,7 +47,9 @@ export default function StoreForm({ id }) {
       location: storeInfo.location,
     }
     const storeinfo = await SetNewStores(newStore)
-    console.log(storeinfo)
+
+    const storeNameInfoByName = await GetStoreByName(storeinfo.storeName)
+      window.location.hash = `/home/Store/${storeNameInfoByName[0].StoreID}`
     return true
   }
   async function UpdateStore() {
@@ -54,8 +57,7 @@ export default function StoreForm({ id }) {
       storeName: storeInfo.storeName,
       location: storeInfo.location,
     }
-    const storeinfo = await SetUpdateStore(UpdateStoreInfo,storeInfo.storeID)
-    console.log(storeinfo)
+    const storeinfo = await SetUpdateStore(UpdateStoreInfo, storeInfo.storeID)
     return true
   }
   useEffect(() => {
@@ -65,26 +67,40 @@ export default function StoreForm({ id }) {
     }
   }, [id])
   async function SaveOpreation() {
-    if (await IsValidInfo()) {
-      if (IsAddNew) {
-        if (InsertNewStore) {
-          return true
-        } else {
-          return false
-        }
+
+
+    if (await IsValidInfo() != true) {
+      return false
+    }
+
+    if (IsAddNew) {
+      if (await InsertNewStore()) {
+        return true
+      } else {
+        return false
       }
     } else {
-      return false
+      if (await UpdateStore()) {
+        return true
+      } else {
+        return false
+      }
     }
   }
 
   async function IsValidInfo() {
-    const storeNameInfo = await GetStoreByName(storeInfo.storeName)
-    if (storeNameInfo != null) {
-      return true
-    } else {
-      return false
+    if (storeInfo.storeName.trim() == '') return false
+
+    if (IsAddNew) {
+      const storeNameInfo = await GetStoreByName(storeInfo.storeName)
+      if (storeNameInfo.status != null ) {
+        return true
+      } else {
+        return false
+      }
     }
+
+    return true
   }
   return (
     <>
@@ -119,6 +135,25 @@ export default function StoreForm({ id }) {
               sm="2"
               type="text"
               placeholder="اسم المتجر"
+              style={{ minWidth: '250px' }}
+            />
+          </Col>
+        </Form.Group>
+        <Form.Group
+          as={Row}
+          style={{ marginTop: '50px', marginBottom: '25px' }}
+          controlId="formLocation"
+        >
+          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
+            اسم الموقع :
+          </Form.Label>
+          <Col sm="3">
+            <Form.Control
+              value={storeInfo.location}
+              onChange={(e) => ChangeLocationValue(e.target.value)}
+              sm="2"
+              type="text"
+              placeholder="اسم الموقع"
               style={{ minWidth: '250px' }}
             />
           </Col>

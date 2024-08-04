@@ -110,3 +110,26 @@ export async function SetUpdateStore(StoreInfo, StoreID) {
 
   return data
 }
+
+export async function DeleteStore(StoreID) {
+  const token = Cookies.get('LOGIN_Info')
+
+  let data = null
+  await fetch(`//www.homecproject.somee.com/api/Stores/DeleteStoreByID/${StoreID}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'Content-type': 'application/json',
+    },
+  })
+    .then((result) => {
+      let Promiseresult = result.json()
+      return Promiseresult
+    })
+    .then((finalResult) => {
+      data = finalResult
+    })
+    .catch((error) => console.error('Fetch error:', error))
+
+  return data
+}

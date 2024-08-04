@@ -1,5 +1,4 @@
-import React, { useContext, useEffect } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -20,6 +19,7 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 import '../../../Global/user'
 import { UserContext, GetUserToken } from '../../../Global/user'
 import Cookies from 'js-cookie'
+import LoadingButton from '@mui/lab/LoadingButton'
 
 function ClearLogined() {
   // eslint-disable-next-line prettier/prettier
@@ -27,33 +27,41 @@ function ClearLogined() {
 }
 const Login = () => {
   const userinfo = useContext(UserContext)
+  const [IsLoading, setIsLoading] = useState(false)
 
   async function logined() {
-    await createCookie()
-
-    window.location.hash = '/home'
-  }
-
-  async function createCookie() {
     let username = document.getElementById('username').value
     let pwd = document.getElementById('password').value
 
     let tokenKey = await GetUserToken(username, pwd)
 
     if (tokenKey === '') {
+      setIsLoading(false)
+      ClearLogined()
+      return
+    }
+
+    await createCookie(tokenKey)
+
+    userinfo.setUserInfo((userInfo) => ({
+      ...userInfo,
+      username: username,
+    }))
+
+    window.location.hash = '/home'
+  }
+
+  async function createCookie(tokenKey) {
+
+    if (tokenKey === '') {
+      setIsLoading(false)
       ClearLogined()
       return
     }
 
     Cookies.set('LOGIN_Info', tokenKey, {})
 
-    userinfo.setUserInfo((userInfo) => ({
-      ...userInfo,
-      username: username,
-    }))
   }
-
-
 
   ClearLogined()
   return (
@@ -86,9 +94,18 @@ const Login = () => {
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" onClick={logined} className="px-4">
-                          Login
-                        </CButton>
+                        <LoadingButton
+                          className="px-4"
+                          color="primary"
+                          loading={IsLoading}
+                          onClick={() => {
+                            setIsLoading(true)
+                            logined()
+                          }}
+                          variant="contained"
+                        >
+                          تسجيل الدخول
+                        </LoadingButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
@@ -99,12 +116,12 @@ const Login = () => {
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5" >
+              <CCard className="text-white bg-primary py-5">
                 <CCardBody className="text-center">
                   <div>
                     <h2>حساب جديد؟</h2>
                     <p>
-                       موقع المحاسب المنزلي ,  لحساب الفوانير المنزلية. سجل وقم بتجربة حساب فواتيرك
+                      موقع المحاسب المنزلي , لحساب الفوانير المنزلية. سجل وقم بتجربة حساب فواتيرك
                     </p>
                     <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>

@@ -54,7 +54,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'قائمة المتاجر',
-        to: '/base/breadcrumbs',
+        to: '/home/StoreList',
       },
     ],
   },
