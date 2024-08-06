@@ -39,6 +39,45 @@ const _nav = [
         name: 'قائمة المشتريات',
         to: '/home/PurchsaseList',
       },
+      {
+        component: CNavGroup,
+        name: 'أدراج صنف',
+        to: '/home/PurchsaseList',
+        items: [
+          ,
+          {
+            component: CNavItem,
+            name: 'صنف رئيسي',
+            to: '/home/PurchsaseList',
+          },
+          ,
+          {
+            component: CNavItem,
+            name:'صنف فرعي',
+            to: '/home/PurchsaseList',
+          },
+        ],
+      },
+      ,
+      {
+        component: CNavGroup,
+        name: 'قائمة الاصناف',
+        to: '/home/PurchsaseList',
+        items: [
+          ,
+          {
+            component: CNavItem,
+            name: 'صنف رئيسي',
+            to: '/home/PurchsaseList',
+          },
+          ,
+          {
+            component: CNavItem,
+            name:'صنف فرعي',
+            to: '/home/PurchsaseList',
+          },
+        ],
+      },
     ],
   },
   {
