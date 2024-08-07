@@ -8,8 +8,9 @@ import { TaxPrecent } from '../../Global/Globla'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { GetPurchaseCategoriesTable, GetPurchaseSubCategoriesTable } from '../../Api/CategoriesApi'
 import TransitionAlerts from '../Alert'
+import { GetPurchase_CategoriesTable } from '../../Api/Purchase_CategoriesApi'
+import { GetPurchaseSubCategoriesTableByPCategoryID } from '../../Api/SubBaseCategoriesApi'
 
 function PurchaseForm({
   handlePurchaseType,
@@ -33,12 +34,12 @@ function PurchaseForm({
   const [SCategories, setSCategories] = useState([])
 
   async function GetPCategories() {
-    const dataTable = await GetPurchaseCategoriesTable()
+    const dataTable = await GetPurchase_CategoriesTable()
     setCategories(dataTable)
   }
   async function GetPSCategories() {
     if (Category != -1) {
-      const dataTable = await GetPurchaseSubCategoriesTable(Category)
+      const dataTable = await GetPurchaseSubCategoriesTableByPCategoryID(Category)
       dataTable.status ? setSCategories([]) : setSCategories(dataTable)
     }
   }

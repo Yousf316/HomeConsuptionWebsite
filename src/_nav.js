@@ -48,13 +48,13 @@ const _nav = [
           {
             component: CNavItem,
             name: 'صنف رئيسي',
-            to: '/home/PurchsaseList',
+            to: '/home/Purchase_Category/0',
           },
           ,
           {
             component: CNavItem,
             name:'صنف فرعي',
-            to: '/home/PurchsaseList',
+            to: '/home/PSCategory/0',
           },
         ],
       },
@@ -68,7 +68,7 @@ const _nav = [
           {
             component: CNavItem,
             name: 'صنف رئيسي',
-            to: '/home/PurchsaseList',
+            to: '/home/PCategoryList',
           },
           ,
           {

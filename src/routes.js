@@ -5,6 +5,9 @@ const PurchaseList = React.lazy(() => import('./views/pages/Purchases/PurchaseLi
 const Purchase = React.lazy(() => import('./views/pages/Purchases/AddUpdatePurchase'))
 const StoreOperation = React.lazy(() => import('./views/pages/Stores/AddUpdateStores'))
 const StoreList = React.lazy(() => import('./views/pages/Stores/StoresList'))
+const PCategoryOperation = React.lazy(() => import('./views/pages/purchase Categories/AddUpdatePCategory'))
+const PCategoryList = React.lazy(() => import('./views/pages/purchase Categories/PCategoryList'))
+const PSCategoryOperation = React.lazy(() => import('./views/pages/purchase sub Categories/AddUpdatePSCategory'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -13,6 +16,9 @@ const routes = [
   { path: '/Purchase/:id', name: 'Purchase', element: Purchase },
   { path: '/Store/:id', name: 'StoreOperation', element: StoreOperation },
   { path: '/StoreList', name: 'StoreList', element: StoreList },
+  { path: '/Purchase_Category/:id', name: 'PCategoryOperation', element: PCategoryOperation },
+  { path: '/PCategoryList', name: 'PCategoryList', element: PCategoryList },
+  { path: '/PSCategory/:id', name: 'PSCategoryOperation', element: PSCategoryOperation },
 ]
 
 export default routes

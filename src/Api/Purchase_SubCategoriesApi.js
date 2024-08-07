@@ -73,7 +73,7 @@ export async function AddNewPurchase_SubCategory(PSCategoryInfo) {
   return data
 }
 
-export async function SetUpdatePurchases(PSCategoryInfo, PSCategoryID) {
+export async function UpdatePurchase_SubCategory(PSCategoryInfo, PSCategoryID) {
   const token = Cookies.get('LOGIN_Info')
 
   let data = null
