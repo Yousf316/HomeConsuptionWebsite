@@ -13,6 +13,7 @@ import {
 } from '../../Api/Purchase_SubCategoriesApi'
 import { UserContext } from '../../Global/user'
 import { GetPurchase_CategoriesTable } from '../../Api/Purchase_CategoriesApi'
+import { AddNewPurchaseSubBaseCategories } from '../../Api/SubBaseCategoriesApi'
 
 export default function Purchase_SubCategoryForm({ id }) {
   const [IsAddNew, setIsAddNew] = useState(true)
@@ -53,7 +54,7 @@ export default function Purchase_SubCategoryForm({ id }) {
     const PCategoryInfo = await GetPurchase_SubCategory(id)
     PCategoryInfo.status ? resetPageValue() : SetPCategoryInfo(PCategoryInfo)
   }
-  async function InsertNewPCategory() {
+  async function InsertNewPSCategory() {
     console.log(PCategoryInfo)
 
     const newCategory = {
@@ -61,18 +62,28 @@ export default function Purchase_SubCategoryForm({ id }) {
       createdByUserID: Userinfo.userInfo.UserID,
     }
     const CategoryInfo = await AddNewPurchase_SubCategory(newCategory)
-    window.location.hash = `/home/Purchase_Category/${CategoryInfo.psCategoryID}`
+    console.log(CategoryInfo)
+
+    const newSubBaseCategory = {
+      psCategoryID: CategoryInfo.psCategoryID,
+      pCategoryID: Category,
+      userID: Userinfo.userInfo.UserID,
+    }
+    const SBCategoryInfo = await AddNewPurchaseSubBaseCategories(newSubBaseCategory)
+
+
+    window.location.hash = `/home/PSCategory/${CategoryInfo.psCategoryID}`
 
     return true
   }
-  async function UpdatePCategory() {
-    const UpdatePCategoryInfo = {
+  async function UpdatePSCategory() {
+    const UpdatePSCategoryInfo = {
       psCategoryID: id,
       subCategoryName: PCategoryInfo.subCategoryName,
       updatedByUserID: Userinfo.userInfo.UserID,
     }
     const CategoryInfo = await UpdatePurchase_SubCategory(
-      UpdatePCategoryInfo,
+      UpdatePSCategoryInfo,
       PCategoryInfo.psCategoryID,
     )
     return true
@@ -92,13 +103,13 @@ export default function Purchase_SubCategoryForm({ id }) {
     }
 
     if (IsAddNew) {
-      if (await InsertNewPCategory()) {
+      if (await InsertNewPSCategory()) {
         return true
       } else {
         return false
       }
     } else {
-      if (await UpdatePCategory()) {
+      if (await UpdatePSCategory()) {
         return true
       } else {
         return false
@@ -131,31 +142,32 @@ export default function Purchase_SubCategoryForm({ id }) {
           </Col>
         </Form.Group>
 
-        <Form.Group
-          as={Row}
-          style={{ marginTop: '50px', marginBottom: '25px' }}
-          controlId="formSelectPurchaseCategories"
-          onChange={handleChangeSelectPurchaseCategories}
-        >
-          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            الصنف الرئيسية
-          </Form.Label>
-          <Col sm="3">
-            <Form.Select
-              aria-label="select Purchase Type"
-              value={Category}
-              style={{ minWidth: '250px' }}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              {Categories.map((category) => (
-                <option value={category.PCategoryID} key={category.PCategoryID}>
-                  {category.CategoryName}
-                </option>
-              ))}
-            </Form.Select>
-          </Col>
-        </Form.Group>
-
+        {IsAddNew && (
+          <Form.Group
+            as={Row}
+            style={{ marginTop: '50px', marginBottom: '25px' }}
+            controlId="formSelectPurchaseCategories"
+            onChange={handleChangeSelectPurchaseCategories}
+          >
+            <Form.Label column sm="2" style={{ minWidth: '150px' }}>
+              الصنف الرئيسية
+            </Form.Label>
+            <Col sm="3">
+              <Form.Select
+                aria-label="select Purchase Type"
+                value={Category}
+                style={{ minWidth: '250px' }}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {Categories.map((category) => (
+                  <option value={category.PCategoryID} key={category.PCategoryID}>
+                    {category.CategoryName}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+          </Form.Group>
+        )}
         <Form.Group
           as={Row}
           style={{ marginTop: '50px', marginBottom: '25px' }}

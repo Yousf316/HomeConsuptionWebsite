@@ -8,6 +8,7 @@ const StoreList = React.lazy(() => import('./views/pages/Stores/StoresList'))
 const PCategoryOperation = React.lazy(() => import('./views/pages/purchase Categories/AddUpdatePCategory'))
 const PCategoryList = React.lazy(() => import('./views/pages/purchase Categories/PCategoryList'))
 const PSCategoryOperation = React.lazy(() => import('./views/pages/purchase sub Categories/AddUpdatePSCategory'))
+const PSCategoryList = React.lazy(() => import('./views/pages/purchase sub Categories/PSCategoryList'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -19,6 +20,7 @@ const routes = [
   { path: '/Purchase_Category/:id', name: 'PCategoryOperation', element: PCategoryOperation },
   { path: '/PCategoryList', name: 'PCategoryList', element: PCategoryList },
   { path: '/PSCategory/:id', name: 'PSCategoryOperation', element: PSCategoryOperation },
+  { path: '/PSCategoryList', name: 'PSCategoryList', element: PSCategoryList },
 ]
 
 export default routes

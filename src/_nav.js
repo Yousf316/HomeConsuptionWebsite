@@ -74,7 +74,7 @@ const _nav = [
           {
             component: CNavItem,
             name:'صنف فرعي',
-            to: '/home/PurchsaseList',
+            to: '/home/PSCategoryList',
           },
         ],
       },

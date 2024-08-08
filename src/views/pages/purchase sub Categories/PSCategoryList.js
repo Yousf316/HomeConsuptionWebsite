@@ -5,7 +5,8 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { colorthem } from '../../../Global/coloreThem'
 
 import TransitionAlerts from '../../../components/Alert'
-import { GetPurchase_CategoriesTable ,DeletePurchase_Categories} from '../../../Api/Purchase_CategoriesApi'
+import { DeletePurchase_SubCategory, GetPurchase_SubCategoryTable } from '../../../Api/Purchase_SubCategoriesApi'
+
 
 
 function List() {
@@ -13,11 +14,11 @@ function List() {
     () => [
 
       {
-        accessorKey: 'categoryName',
+        accessorKey: 'SubCategoryName',
         header: 'اسم الصنف',
       },
       {
-        accessorKey: 'pCategoryID',
+        accessorKey: 'PSCategoryID',
         header: 'الرقم التعريفي',
       },
     ],
@@ -31,11 +32,12 @@ function List() {
   const [MessageAlert, setMessageAlert] = React.useState('')
   useEffect(() => {
     const GetList = async () => {
-      const List = await GetPurchase_CategoriesTable()
+      const List = await GetPurchase_SubCategoryTable()
+      console.log(List)
       const updatedRows = List.map((element, key) => ({
         key: key,
-        pCategoryID: String(element.PCategoryID),
-        categoryName: element.CategoryName,
+        PSCategoryID: String(element.PSCategoryID),
+        SubCategoryName: element.SubCategoryName,
       }))
 
       setRowitems(updatedRows)
@@ -64,11 +66,11 @@ function List() {
   )
 
   // Correct: Uses a memoized function
-  const handleClickEditeStore = (id) => {
-    window.location.hash = `/home/Purchase_Category/${id}`
+  const handleClickEdite = (id) => {
+    window.location.hash = `/home/PSCategory/${id}`
   }
-  const handleClickDeleteStore = async (id) => {
-    const DeletedStore = await DeletePurchase_Categories(id)
+  const handleClickDelete = async (id) => {
+    const DeletedStore = await DeletePurchase_SubCategory(id)
 
     if (DeletedStore != null && DeletedStore.status == null) {
       setseverityType('success')
@@ -101,7 +103,7 @@ function List() {
               icon={<Edit />}
               key="edit"
               label="تعديل"
-              onClick={() => handleClickEditeStore(row.original.pCategoryID)}
+              onClick={() => handleClickEdite(row.original.PSCategoryID)}
               table={table}
             />,
             <MRT_ActionMenuItem
@@ -110,9 +112,9 @@ function List() {
               label="حذف"
               onClick={async () => {
                 if (
-                  window.confirm(`هل انت متاكد من حذف الفاتورة رقم : ${row.original.pCategoryID} ؟ `)
+                  window.confirm(`هل انت متاكد من حذف الفاتورة رقم : ${row.original.PSCategoryID} ؟ `)
                 ) {
-                  await handleClickDeleteStore(row.original.pCategoryID)
+                  await handleClickDelete(row.original.PSCategoryID)
                 }
               }}
               table={table}
