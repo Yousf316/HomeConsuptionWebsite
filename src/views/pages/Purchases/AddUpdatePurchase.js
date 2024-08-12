@@ -300,7 +300,6 @@ const AddUpdatePurchase = () => {
       return false
     }
     const PurchaseID = newPurchaseinfo.purchaseID
-    document.getElementById('formPlaintextPurchaseID').value = `${PurchaseID}`
 
     //
     if (purchasetype == 2) {
@@ -322,6 +321,9 @@ const AddUpdatePurchase = () => {
       })
       const subPurchases = await SetNewSubPurchases(purchaseItems, PurchaseID)
     }
+    document.getElementById('formPlaintextPurchaseID').value = `${PurchaseID}`
+
+    window.location.hash = `/home/Purchase/${PurchaseID}`
     return true
   }
   async function SaveOpreation() {

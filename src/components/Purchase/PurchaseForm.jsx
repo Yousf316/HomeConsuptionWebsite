@@ -59,7 +59,13 @@ function PurchaseForm({
           رقم الفاتورة
         </Form.Label>
         <Col sm="3">
-          <Form.Control style={{ marginBottom: '25px' }} sm="2" plaintext readOnly defaultValue="لا يوجد" />
+          <Form.Control
+            style={{ marginBottom: '25px' }}
+            sm="2"
+            plaintext
+            readOnly
+            defaultValue="لا يوجد"
+          />
         </Col>
       </Form.Group>
 
@@ -269,7 +275,6 @@ export function PurchaseFormSave({ SaveOpreation }) {
             } else {
               setseverityType('error')
               setMessageAlert('فشلت العملية')
-
             }
             setopenAlert(true)
           }}

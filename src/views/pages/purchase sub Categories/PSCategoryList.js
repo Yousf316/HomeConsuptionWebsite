@@ -3,16 +3,18 @@ import { MaterialReactTable, MRT_ActionMenuItem, useMaterialReactTable } from 'm
 import { Edit, Delete } from '@mui/icons-material'
 import { createTheme, ThemeProvider } from '@mui/material'
 import { colorthem } from '../../../Global/coloreThem'
-
 import TransitionAlerts from '../../../components/Alert'
-import { DeletePurchase_SubCategory, GetPurchase_SubCategoryTable } from '../../../Api/Purchase_SubCategoriesApi'
-
-
+import {
+  DeletePurchase_SubCategory,
+  GetPurchase_SubCategoryTable,
+} from '../../../Api/Purchase_SubCategoriesApi'
+import { Button } from 'react-bootstrap'
+import style from '../../../components/Purchase_SubCategories/PSCategoryList.module.css'
+import FormPSDialog from '../../../components/Purchase_SubCategories/PSDialog'
 
 function List() {
   const columns = useMemo(
     () => [
-
       {
         accessorKey: 'SubCategoryName',
         header: 'اسم الصنف',
@@ -26,10 +28,22 @@ function List() {
   )
   const [Rowitems, setRowitems] = useState([])
   const [Refresh, setRefresh] = useState(false)
+  const [openDialog, setopenDialog] = useState(false)
+  const [Typeitemsrow, setTypeitemsrow] = useState(1) // 1 create, 2 delete
 
   const [openAlert, setopenAlert] = React.useState(false)
   const [severityType, setseverityType] = React.useState('')
   const [MessageAlert, setMessageAlert] = React.useState('')
+
+  const handleClickOpen = (number) => {
+    setopenDialog(true)
+    setTypeitemsrow(number)
+  }
+
+  const handleClose = () => {
+    setopenDialog(false)
+  }
+
   useEffect(() => {
     const GetList = async () => {
       const List = await GetPurchase_SubCategoryTable()
@@ -86,6 +100,15 @@ function List() {
 
   return (
     <>
+      {openDialog && (
+        <FormPSDialog open={openDialog} handleClose={handleClose} TypeOpration={Typeitemsrow} />
+      )}
+      <Button className={style['btnList']} onClick={() => handleClickOpen(1)}>
+        ربط صنف فرعي بمجموعة
+      </Button>
+      <Button className={style['btnList']} onClick={() => handleClickOpen(2)}>
+        الغاء ربط صنف فرعي بمجموعة
+      </Button>
       <TransitionAlerts
         open={openAlert}
         setOpen={setopenAlert}
@@ -112,7 +135,9 @@ function List() {
               label="حذف"
               onClick={async () => {
                 if (
-                  window.confirm(`هل انت متاكد من حذف الفاتورة رقم : ${row.original.PSCategoryID} ؟ `)
+                  window.confirm(
+                    `هل انت متاكد من حذف الفاتورة رقم : ${row.original.PSCategoryID} ؟ `,
+                  )
                 ) {
                   await handleClickDelete(row.original.PSCategoryID)
                 }
