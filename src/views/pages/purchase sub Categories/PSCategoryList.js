@@ -47,7 +47,6 @@ function List() {
   useEffect(() => {
     const GetList = async () => {
       const List = await GetPurchase_SubCategoryTable()
-      console.log(List)
       const updatedRows = List.map((element, key) => ({
         key: key,
         PSCategoryID: String(element.PSCategoryID),

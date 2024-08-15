@@ -53,7 +53,6 @@ export async function AddNewPurchaseSubBaseCategories(PSBCategoryInfo) {
 
 export async function DeletePurchaseSubBaseCategories(PSCategoryID, PCategoryID) {
   const token = Cookies.get('LOGIN_Info')
-
   let data = null
   await fetch(
     `//www.homecproject.somee.com/api/PurchaseSubBaseCategories/DeletePurchaseSubBaseCategories/PSCategoryID=${PSCategoryID}&PCategoryID=${PCategoryID}`,

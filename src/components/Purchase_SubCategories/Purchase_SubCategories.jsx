@@ -55,14 +55,12 @@ export default function Purchase_SubCategoryForm({ id }) {
     PCategoryInfo.status ? resetPageValue() : SetPCategoryInfo(PCategoryInfo)
   }
   async function InsertNewPSCategory() {
-    console.log(PCategoryInfo)
 
     const newCategory = {
       subCategoryName: PCategoryInfo.subCategoryName,
       createdByUserID: Userinfo.userInfo.UserID,
     }
     const CategoryInfo = await AddNewPurchase_SubCategory(newCategory)
-    console.log(CategoryInfo)
 
     const newSubBaseCategory = {
       psCategoryID: CategoryInfo.psCategoryID,
