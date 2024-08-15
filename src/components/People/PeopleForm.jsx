@@ -3,12 +3,12 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import { Box, Button } from '@mui/material'
-import Styles from './StoreFormStyles.module.css'
+import Styles from './PeopleForm.module.css'
 
 import TransitionAlerts from '../Alert'
 import { GetStoreByID, GetStoreByName, SetNewStores, SetUpdateStore } from '../../Api/StoreApi'
 
-export default function StoreForm({ id }) {
+export default function PeopleForm({ id }) {
   const [IsAddNew, setIsAddNew] = useState(true)
   const [storeInfo, setstoreInfo] = useState({ storeID: 'لا يوجد', storeName: '', location: '' })
 

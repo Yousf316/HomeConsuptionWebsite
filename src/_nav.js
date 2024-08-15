@@ -105,22 +105,22 @@ const _nav = [
       {
         component: CNavItem,
         name: 'أدراج المنتجات جديد',
-        to: '/base/breadcrumbs',
+        to: '/home/ProductOperation/0',
       },
       {
         component: CNavItem,
         name: 'قائمة المنتجات',
-        to: '/base/breadcrumbs',
+        to: '/home/ProductList',
       },
       {
         component: CNavItem,
         name: 'أدراج مجموعة جديدة',
-        to: '/base/breadcrumbs',
+        to: '/home/ProductCategoryOperation/0',
       },
       {
         component: CNavItem,
         name: 'قائمة المجموعات',
-        to: '/base/breadcrumbs',
+        to: '/home/ProductCategoryList',
       },
     ],
   },
@@ -132,17 +132,17 @@ const _nav = [
       {
         component: CNavItem,
         name: 'أدراج مستخدم جديد',
-        to: '/base/breadcrumbs',
+        to: '/home/UsersOperation/0',
       },
       {
         component: CNavItem,
         name: 'قائمة المستخدمين',
-        to: '/base/breadcrumbs',
+        to: '/home/UsersList',
       },
       {
         component: CNavItem,
         name: 'قائمة الافراد',
-        to: '/base/breadcrumbs',
+        to: '/home/PeopleList',
       },
     ],
   },

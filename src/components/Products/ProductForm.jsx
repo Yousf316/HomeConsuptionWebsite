@@ -3,14 +3,15 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import { Box, Button } from '@mui/material'
-import Styles from './StoreFormStyles.module.css'
+import Styles from './ProductForm.module.css'
 
 import TransitionAlerts from '../Alert'
 import { GetStoreByID, GetStoreByName, SetNewStores, SetUpdateStore } from '../../Api/StoreApi'
 
-export default function StoreForm({ id }) {
+export default function ProductForm({ id }) {
   const [IsAddNew, setIsAddNew] = useState(true)
   const [storeInfo, setstoreInfo] = useState({ storeID: 'لا يوجد', storeName: '', location: '' })
+  const [ProductCategories, setProductCategories] = useState({})
 
   function SetStoreInfo(StoreInfo) {
     setstoreInfo((previnfo) => ({
@@ -65,6 +66,11 @@ export default function StoreForm({ id }) {
       GetStoreINfo()
     }
   }, [id])
+
+  function handleChangeSelectPurchaseCategories(e) {
+    setCategory(e.target.value)
+  }
+
   async function SaveOpreation() {
     if ((await IsValidInfo()) != true) {
       return false
@@ -102,9 +108,9 @@ export default function StoreForm({ id }) {
   return (
     <>
       <Form className={Styles['Save-form-main']}>
-        <Form.Group as={Row} controlId="formPlaintextStoreID">
+        <Form.Group style={{ marginBottom: '30px' }} as={Row} controlId="formPlaintextStoreID">
           <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            رقم الفاتورة :
+            رقم المنتج :
           </Form.Label>
           <Col sm="3">
             <Form.Control
@@ -120,10 +126,44 @@ export default function StoreForm({ id }) {
         <Form.Group
           as={Row}
           style={{ marginTop: '50px', marginBottom: '25px' }}
+          controlId="formPlaintextImageProduct"
+        >
+          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
+            صورة المنتج (اختياري) :
+          </Form.Label>
+          <Col sm="3">
+            <Form.Control sm="2" type="file" placeholder="ألاسم" style={{ minWidth: '250px' }} />
+          </Col>
+        </Form.Group>
+
+        <Form.Group
+          as={Row}
+          className="mb-3"
+          controlId="formSelectPurchaseCategories"
+          onChange={handleChangeSelectPurchaseCategories}
+        >
+          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
+            الصنف الرئيسية
+          </Form.Label>
+          <Col sm="3">
+            <Form.Select
+              aria-label="select Purchase Type"
+              value={ProductCategories}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ minWidth: '250px' }}
+            >
+              <option value={-1}>اختر....</option>
+            </Form.Select>
+          </Col>
+        </Form.Group>
+
+        <Form.Group
+          as={Row}
+          style={{ marginTop: '50px', marginBottom: '25px' }}
           controlId="formPlaintextStoreName"
         >
           <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            اسم المتجر :
+            اسم المنتج (العربي) :
           </Form.Label>
           <Col sm="3">
             <Form.Control
@@ -131,7 +171,7 @@ export default function StoreForm({ id }) {
               onChange={(e) => ChangeStoreNameValue(e.target.value)}
               sm="2"
               type="text"
-              placeholder="اسم المتجر"
+              placeholder="ألاسم"
               style={{ minWidth: '250px' }}
             />
           </Col>
@@ -142,7 +182,7 @@ export default function StoreForm({ id }) {
           controlId="formLocation"
         >
           <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            اسم الموقع :
+            اسم المنتجر (ENG) (اختياري) :
           </Form.Label>
           <Col sm="3">
             <Form.Control
@@ -150,9 +190,18 @@ export default function StoreForm({ id }) {
               onChange={(e) => ChangeLocationValue(e.target.value)}
               sm="2"
               type="text"
-              placeholder="اسم الموقع"
+              placeholder="الاسم"
               style={{ minWidth: '250px' }}
             />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} controlId="formInputTotal">
+          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
+            المجموع
+          </Form.Label>
+          <Col sm="3">
+            <Form.Control type="number" defaultValue={0.0} style={{ minWidth: '250px' }} />
           </Col>
         </Form.Group>
       </Form>

@@ -3,12 +3,12 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import { Box, Button } from '@mui/material'
-import Styles from './StoreFormStyles.module.css'
+import Styles from './ProductCategoryForm.module.css'
 
 import TransitionAlerts from '../Alert'
 import { GetStoreByID, GetStoreByName, SetNewStores, SetUpdateStore } from '../../Api/StoreApi'
 
-export default function StoreForm({ id }) {
+export default function ProductCategoryForm({ id }) {
   const [IsAddNew, setIsAddNew] = useState(true)
   const [storeInfo, setstoreInfo] = useState({ storeID: 'لا يوجد', storeName: '', location: '' })
 
@@ -104,7 +104,7 @@ export default function StoreForm({ id }) {
       <Form className={Styles['Save-form-main']}>
         <Form.Group as={Row} controlId="formPlaintextStoreID">
           <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            رقم الفاتورة :
+            رقم المجموعة :
           </Form.Label>
           <Col sm="3">
             <Form.Control
@@ -123,7 +123,7 @@ export default function StoreForm({ id }) {
           controlId="formPlaintextStoreName"
         >
           <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            اسم المتجر :
+            اسم المجموعة :
           </Form.Label>
           <Col sm="3">
             <Form.Control
@@ -136,25 +136,7 @@ export default function StoreForm({ id }) {
             />
           </Col>
         </Form.Group>
-        <Form.Group
-          as={Row}
-          style={{ marginTop: '50px', marginBottom: '25px' }}
-          controlId="formLocation"
-        >
-          <Form.Label column sm="2" style={{ minWidth: '150px' }}>
-            اسم الموقع :
-          </Form.Label>
-          <Col sm="3">
-            <Form.Control
-              value={storeInfo.location}
-              onChange={(e) => ChangeLocationValue(e.target.value)}
-              sm="2"
-              type="text"
-              placeholder="اسم الموقع"
-              style={{ minWidth: '250px' }}
-            />
-          </Col>
-        </Form.Group>
+
       </Form>
       <StoreFormSave SaveOpreation={SaveOpreation} />
     </>
