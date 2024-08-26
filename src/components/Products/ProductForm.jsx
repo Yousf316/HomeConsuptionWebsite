@@ -6,64 +6,101 @@ import { Box, Button } from '@mui/material'
 import Styles from './ProductForm.module.css'
 
 import TransitionAlerts from '../Alert'
-import { GetStoreByID, GetStoreByName, SetNewStores, SetUpdateStore } from '../../Api/StoreApi'
+import { GetItemsInfo, SetNewProduct, SetUpdateProduct } from '../../Api/ItemsApi'
+import { GetProductCategories } from '../../Api/ProductCategories'
 
 export default function ProductForm({ id }) {
   const [IsAddNew, setIsAddNew] = useState(true)
-  const [storeInfo, setstoreInfo] = useState({ storeID: 'لا يوجد', storeName: '', location: '' })
-  const [ProductCategories, setProductCategories] = useState({})
+  const [ProductInfo, setProductInfo] = useState({
+    ItemID: 'لا يوجد',
+    itemName_AR: '',
+    itemName_EN: '',
+    imagePath: '',
+    categoryID: -1,
+    price: 0,
+  })
+  const [ProductCategories, setProductCategories] = useState([])
 
-  function SetStoreInfo(StoreInfo) {
-    setstoreInfo((previnfo) => ({
+  function SetProductInfo(ProductInfo) {
+    setProductInfo((previnfo) => ({
       ...previnfo,
-      storeID: id,
-      storeName: StoreInfo.storeName,
-      location: StoreInfo.location,
+      ItemID: id,
+      itemName_AR: ProductInfo.itemName_AR,
+      itemName_EN: ProductInfo.itemName_EN,
+      imagePath: ProductInfo.imagePath,
+      categoryID: ProductInfo.categoryID,
+      price: ProductInfo.price,
     }))
     setIsAddNew(false)
   }
 
-  function resetPageValue() {
-    setstoreInfo((previnfo) => ({
+  async function GetProductCategoriesTable() {
+    const dt = await GetProductCategories()
+    setProductCategories(dt)
+  }
+
+  async function resetPageValue() {
+    console.log('hi')
+
+    GetProductCategoriesTable()
+    setProductInfo((previnfo) => ({
       ...previnfo,
-      storeID: 'لا يوجد',
-      storeName: '',
+      ItemID: 'لا يوجد',
+      itemName_AR: '',
+      itemName_EN: '',
+      imagePath: '',
+      categoryID: -1,
+      price: 0,
     }))
     setIsAddNew(true)
   }
-  function ChangeStoreNameValue(Name) {
-    setstoreInfo({ ...storeInfo, storeName: Name })
+  function ChangeitemName_ARValue(Name) {
+    setProductInfo({ ...ProductInfo, itemName_AR: Name })
   }
-  function ChangeLocationValue(Name) {
-    setstoreInfo({ ...storeInfo, location: Name })
+  function ChangeCategoryIdValue(CategoryID) {
+    setProductInfo({ ...ProductInfo, categoryID: CategoryID })
   }
-  async function GetStoreINfo() {
-    const storeinfo = await GetStoreByID(id)
-    storeinfo.status ? resetPageValue() : SetStoreInfo(storeinfo)
-  }
-  async function InsertNewStore() {
-    const newStore = {
-      storeName: storeInfo.storeName,
-      location: storeInfo.location,
-    }
-    const storeinfo = await SetNewStores(newStore)
 
-    const storeNameInfoByName = await GetStoreByName(storeinfo.storeName)
-    window.location.hash = `/home/Store/${storeNameInfoByName[0].StoreID}`
+  function ChangepProductPriceValue(price) {
+    setProductInfo({ ...ProductInfo, price: price })
+  }
+
+  function ChangeitemName_ENValue(Name) {
+    setProductInfo({ ...ProductInfo, itemName_EN: Name })
+  }
+  async function GetProductINfo() {
+    const Productinfo = await GetItemsInfo(id)
+    Productinfo.status ? resetPageValue() : SetProductInfo(Productinfo)
+  }
+  async function InsertnewProduct() {
+    const newProduct = {
+      itemName_AR: ProductInfo.itemName_AR,
+      itemName_EN: ProductInfo.itemName_EN,
+      imagePath: ProductInfo.imagePath,
+      categoryID: ProductInfo.categoryID,
+      price: ProductInfo.price,
+    }
+    const Productinfo = await SetNewProduct(newProduct)
+    if (Productinfo.status != null) return false
+
+    window.location.hash = `/home/ProductOperation/${storeNameInfoByName[0].StoreID}`
     return true
   }
-  async function UpdateStore() {
-    const UpdateStoreInfo = {
-      storeName: storeInfo.storeName,
-      location: storeInfo.location,
+  async function UpdateProduct() {
+    const UpdateProductInfo = {
+      itemName_AR: ProductInfo.itemName_AR,
+      itemName_EN: ProductInfo.itemName_EN,
+      imagePath: ProductInfo.imagePath,
+      categoryID: ProductInfo.categoryID,
+      price: ProductInfo.price,
     }
-    const storeinfo = await SetUpdateStore(UpdateStoreInfo, storeInfo.storeID)
-    return true
+    const Productinfo = await SetUpdateProduct(UpdateProductInfo, ProductInfo.itemID)
+    return Productinfo.status == null ? true : false
   }
   useEffect(() => {
     resetPageValue()
     if (id != 0) {
-      GetStoreINfo()
+      GetProductINfo()
     }
   }, [id])
 
@@ -77,13 +114,13 @@ export default function ProductForm({ id }) {
     }
 
     if (IsAddNew) {
-      if (await InsertNewStore()) {
+      if (await InsertnewProduct()) {
         return true
       } else {
         return false
       }
     } else {
-      if (await UpdateStore()) {
+      if (await UpdateProduct()) {
         return true
       } else {
         return false
@@ -92,10 +129,10 @@ export default function ProductForm({ id }) {
   }
 
   async function IsValidInfo() {
-    if (storeInfo.storeName.trim() == '') return false
+    if (ProductInfo.storeName.trim() == '') return false
 
     if (IsAddNew) {
-      const storeNameInfo = await GetStoreByName(storeInfo.storeName)
+      const storeNameInfo = await GetStoreByName(ProductInfo.storeName)
       if (storeNameInfo.status != null) {
         return true
       } else {
@@ -115,7 +152,7 @@ export default function ProductForm({ id }) {
           <Col sm="3">
             <Form.Control
               sm="2"
-              value={storeInfo.storeID}
+              value={ProductInfo.ItemID}
               plaintext
               readOnly
               defaultValue="لا يوجد"
@@ -132,7 +169,13 @@ export default function ProductForm({ id }) {
             صورة المنتج (اختياري) :
           </Form.Label>
           <Col sm="3">
-            <Form.Control sm="2" type="file" placeholder="ألاسم" style={{ minWidth: '250px' }} />
+            <Form.Control
+              value={ProductInfo.imagePath}
+              sm="2"
+              type="file"
+              placeholder="ألاسم"
+              style={{ minWidth: '250px' }}
+            />
           </Col>
         </Form.Group>
 
@@ -148,11 +191,16 @@ export default function ProductForm({ id }) {
           <Col sm="3">
             <Form.Select
               aria-label="select Purchase Type"
-              value={ProductCategories}
-              onChange={(e) => setCategory(e.target.value)}
+              value={ProductInfo.categoryID}
+              onChange={(e) => ChangeCategoryIdValue(e.target.value)}
               style={{ minWidth: '250px' }}
             >
               <option value={-1}>اختر....</option>
+              {ProductCategories.map((category) => (
+                <option value={category.CategoryID} key={category.CategoryID}>
+                  {category.CategoryName}
+                </option>
+              ))}
             </Form.Select>
           </Col>
         </Form.Group>
@@ -167,8 +215,8 @@ export default function ProductForm({ id }) {
           </Form.Label>
           <Col sm="3">
             <Form.Control
-              value={storeInfo.storeName}
-              onChange={(e) => ChangeStoreNameValue(e.target.value)}
+              value={ProductInfo.itemName_AR}
+              onChange={(e) => ChangeitemName_ARValue(e.target.value)}
               sm="2"
               type="text"
               placeholder="ألاسم"
@@ -186,8 +234,8 @@ export default function ProductForm({ id }) {
           </Form.Label>
           <Col sm="3">
             <Form.Control
-              value={storeInfo.location}
-              onChange={(e) => ChangeLocationValue(e.target.value)}
+              value={ProductInfo.itemName_EN}
+              onChange={(e) => ChangeitemName_ENValue(e.target.value)}
               sm="2"
               type="text"
               placeholder="الاسم"
@@ -201,7 +249,13 @@ export default function ProductForm({ id }) {
             المجموع
           </Form.Label>
           <Col sm="3">
-            <Form.Control type="number" defaultValue={0.0} style={{ minWidth: '250px' }} />
+            <Form.Control
+              type="number"
+              value={ProductInfo.price}
+              defaultValue={0.0}
+              onChange={(e) => ChangepProductPriceValue(e.target.value)}
+              style={{ minWidth: '250px' }}
+            />
           </Col>
         </Form.Group>
       </Form>
